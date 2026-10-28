@@ -1,0 +1,45 @@
+# ==========================================================
+# NatiFine SA - Render Blueprint
+# Deploy: Render Dashboard -> New -> Blueprint -> select this repo.
+# Secrets are marked `sync: false` and must be set in the dashboard.
+# ==========================================================
+services:
+  - type: web
+    name: natifine-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: gunicorn -c gunicorn.conf.py "app.factory:create_app()"
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.0"
+      - key: FLASK_ENV
+        value: production
+      - key: WEB_CONCURRENCY
+        value: "2"
+      - key: GUNICORN_TIMEOUT
+        value: "120"
+      - key: MAIL_SUPPRESS_SEND
+        value: "true"
+
+      # Set the real values in the Render dashboard, not in Git.
+      - key: SECRET_KEY
+        sync: false
+      - key: JWT_SECRET_KEY
+        sync: false
+
+      # Production database (managed MySQL). Leave unset to use DB_* vars.
+      - key: DATABASE_URL
+        sync: false
+      - key: DB_SSL
+        value: "true"
+      - key: DB_POOL_RECYCLE
+        value: "280"
+
+      # Comma-separated browser origins, e.g.
+      #   https://natifine.vercel.app,http://localhost:5000
+      - key: CORS_ORIGINS
+        sync: false
