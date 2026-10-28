@@ -1,0 +1,793 @@
+--- PAGE 1 ---
+NatiFine SA 
+Digital Traffic Fines System 
+Project Name: NatiFine SA – Digital Traffic Fines System. 
+Group Members: Asande Mazibuko (402311204) 
+                              Lesego Mokoena (402412814)   
+                              Ofentse Mathebe (402413228) 
+Due Date: 09 October 2026 
+ 
+--- PAGE 2 ---
+3. Analysis Phase 
+ 
+3.1 Introduction 
+The Planning Phase (Phase 2) established that traffic fine administration in South 
+Africa is fragmented, address -based and largely manual, and it confirmed that a 
+centralised, ID-linked prototype called NatiFine SA is  necessary, technically 
+achievable, operationally beneficial and economically viable. Phase 3 builds on those 
+findings. Whereas Phase 2 answered the question “should we build this and how will 
+we organise the work?”. The Analysis Phase answers, “what exactly must the system 
+do, and what must it store?”. 
+The purpose of this phase is to study the current way in which fines are issued, 
+communicated, paid and disputed and to identify the data the proposed system must 
+hold and the rules that keep that data correct, to expose the weaknesses of the current 
+arrangement, and to translate these findings into clear functional and non -functional 
+requirements and a data model. The output of this phase is the input to the Design 
+phase,  so every requirement is written to be testable. 
+This chapter is organized as follows: 
+• 3.2 Information gathering methodology: how facts about the current system 
+were collected. 
+• 3.3 Analysis of the existing system: how fines are handled today. 
+• 3.4 Data analysis: the data to be stored, its integrity rules and constraints. 
+• 3.5 Weaknesses of the current system. 
+• 3.6 Analysis of the proposed system: functional requirements. 
+• 3.7 Non-Functional requirements. 
+• 3.8 Data modelling for the proposed system. 
+Scope reminder. As agreed in Phase 2, NatiFine SA is an academic prototype built 
+with Python, HTML/CSS, JavaScript and SQLite. Payments, SMS and WhatsApp 
+delivery and government data are simulated whereas  all fines, motorists and payment 
+details are used for demonstration and are fictitious. 
+ 
+3.2 Information Gathering Methodology 
+The methodology for the project NatiFine SA is based on preliminary research, 
+analysis of available information in public domain, as well as evaluation of needs 
+identified in Phases 1 and 2. There were no actual interviews with motorists, traffic 
+officers or municipal officials carried out. No interview outcomes were presented or 
+indicated that feedback was gained from external representatives in the analysis. 
+Instead, project documents and information available in public domain were utilized 
+for problem understanding and project requirements identification. 
+--- PAGE 3 ---
+ 
+The methodology proved to be quite relevant for the academic purposes of this 
+project, as the educators had to understand the concept of traffic fines, point out 
+major weaknesses and figure out basic functions of the prototype. 
+ 
+3.2.1 Observation 
+ 
+The team assessed the problem statement, project proposal and planning documentation 
+which were prepared in the First and Second phases of the project. This documentation 
+stated that fragmented activities are accompanied by problems, and a solution was 
+proposed in the form of the required digital platform where drivers will be able to see their 
+fines, perform payment simulations, file complaints and get notifications. 
+Publicly available information on the traffic violations in South Africa was used in order to get 
+an idea of the basic stages of dealing with the infringement notifications. The guidance on 
+the Administrative Adjudication of Road Traffic Offences published by the South African 
+Government states such processes as making payments and declaring the incident 
+(Government, 2010). Such information was useful while analyzing the processes that will be 
+demonstrated in the prototype. 
+The disadvantage of the given method is that public materials do not give insight into local 
+internal procedures, nor do they guarantee that all government bodies have the same 
+procedures. As a result, the derived knowledge is going to be used in the process of 
+establishing the requirements of the prototype but not as an argument for claiming that every 
+traffic authority operates identically. 
+3.2.2 Participatory Method 
+The project group made an analysis of issues and targets as described in Phase 1 
+documentation and Phase 2 design papers. These issues included the problem of 
+places where fines could be displayed, a need for the clear payment and dispute 
+system, the necessity for reminders and accessible information about fines. 
+Then all the requirements were transformed into system functions, such as the 
+registration of motorists and login, fine display, demonstration of payment 
+operations, submission of disputes, sending notifications and reminders, and 
+interaction with an admin. The limitations of the project were kept in mind as well – 
+the use of fictional data and lack of real government databases, banking and 
+SMS/WhatsApp gates. 
+This way, the team made sure that their analysis was consistent with the official 
+project outline and the Agile methodology in question. However, at this stage, as 
+formal interviews were not conducted, and external user testing was not performed 
+yet, the project group cannot state that the requirements were validated with the help 
+of representative groups. 
+ 
+--- PAGE 4 ---
+3.2.3 Interviews 
+The primary disadvantage was the lack of formal interviews and direct confirmations 
+from the municipal traffic authorities. As a result, the team was not able to verify 
+independently all user experiences or internal administrative procedures. The results 
+are based on the materials gained from the project and available public information 
+and hence should be taken in this context.  
+It would be possible to acquire further feedback during a later stage of the Agile 
+development process by approaching the supervisor and, if feasible, prospective 
+users regarding the usability of the prototypes. Any feedback obtained will be 
+recorded accordingly and used to adjust the requirements.
+ 
+Summary of Findings 
+The preliminary research has shown that there is a need in the market for a solution 
+to integrate key functions of fine management to one interface. The proposed 
+technology will allow drivers to see the fines associated with their accounts, simulate 
+payment processes, make claims and receive notifications. An officer or an 
+administrator will be tasked with entering fines and managing disputes. 
+The findings are based on initial project research and document review and are not 
+supported by completed interviews and user studies. They form the basis for the 
+existing process analysis; weaknesses identified in section 3.5 and the requirements 
+for the new system proposed in section 3.6. 
+--- PAGE 5 ---
+3.3 Analysis of the Existing System. 
+The existing arrangement is not one system but several loosely related ones in 
+which individual municipalities and metropolitan police departments each run their 
+own fine-management systems which are supported by the national AARTO 
+framework and the eNatis licensing environment. These do not share a common, ID-
+based record of a motorist’s fines. 
+3.3.1 How the Current System Works? 
+Step
+ 
+ Activity
+ 
+ Description
+ 
+1 
+ Offence and issuing A traffic officer or camera records the 
+offence. Details are captured on a notice 
+or into the issuing authority’s own system
+ 
+2 
+ Capturing The fine is stored in that municipality’s 
+database. It is linked to a vehicle or 
+address, not to a single national motorist 
+record.
+ 
+3 
+ Notification A notice is posted to the address 
+registered against the vehicle or motorist. 
+There is no instant electronic alert with 
+photographic evidence.
+ 
+4 
+ Payment The motorist pays at a municipal office, 
+bank or an e-services portal. Each 
+authority has its own payment channel and 
+reference format.
+ 
+5 
+ Dispute/Representation A motorist who disagrees must make 
+representation through the prescribed 
+process, often in person or by post, with 
+supporting documents.
+ 
+6 
+ Follow-up Unpaid fines escalate through further 
+notices and penalties. The motorist 
+frequently learns of the problem only when 
+renewing the driver’s license.
+ 
+ 
+Below is the current fine-handling process: 
+--- PAGE 6 ---
+ 
+3.3.2 Users and Stakeholders of the Current System 
+Stakeholder Role and interest 
+Motorist Receives, pays or disputes fines. Needs timely, 
+accurate information. 
+Traffic officer Issues fines and records offence details. 
+Municipal fines / back-office clerk Captures fines, processes payments and handles 
+representations. 
+Municipality / traffic authority Collects revenue and must ensure fines are 
+enforceable and traceable. 
+Licensing department Checks for outstanding fines when a licence is 
+renewed. 
+ 
+3.3.3 Information Flow Observed 
+Information flows one way (authority to motorist) by post and returns only when the motorist 
+acts.  
+There is no automatic feedback if a notice is undelivered, no automatic reminder, and no 
+shared record between authorities.  
+Fines also remain invisible to the motorist until a notice arrives or the motorist makes an 
+enquiry. 
+
+--- PAGE 7 ---
+3.4 Data Analysis (Data Integrity and Constraints) 
+Data analysis identifies the information that the NatiFine SA prototype must store, the 
+sources of that information and the rules required to maintain its accuracy, consistency 
+and security. The system stores motorist details, traffic -fine records, payment  
+information, dispute submissions and notification histories. Appropriate integrity rules 
+are necessary to prevent duplicate records, invalid data and unauthorised access. 
+The project is an academic prototype and will use fictitious information rather than 
+actual motorists' personal information or live government records. The data model is 
+designed to support the functions identified in Phase 2, including viewing fines, 
+simulating payments, submitting disputes and generating reminders. Data protection 
+is also considered in line with the Protection of Personal Information Act 4 of 2013 
+(POPIA), which establishes requirements for the lawful processing and protection of 
+personal information (Africa, 2013). 
+3.4.1 Data Sources and Data Classification 
+The data required by NatiFine SA will originate from the following sources: 
+• Motorist information: The motorist enters registration details such as an ID 
+number, name, surname, telephone number, email address and password. 
+Fictitious details will be used during development and demonstrations. 
+• Fine information:  An authorised officer or administrator captures the fine 
+identification number, motorist reference, issue date, due date, offence 
+description, location, amount and photograph reference. 
+• Payment information: The simulated payment module records the amount, 
+payment date, payment method and transaction status. No actual banking 
+transactions will take place. 
+• Dispute information: The motorist provides the reason for disputing a fine and 
+may attach supporting evidence. The administrator updates the dispute status. 
+• Notification information:  The system generates simulated SMS and 
+WhatsApp-style messages and stores their type, content and date in the 
+notification history. 
+• Security and access information:  The system stores account identifiers, 
+password hashes and user roles to support authentication and access control. 
+The data can be classified as personal, operational, financial, dispute -related and 
+security information. Access must be restricted according to the user's role. For 
+example, motorists should only access their own fine records, while authorised officers 
+or administrators may access the records required to perform their assigned functions. 
+The prototype will follow the principles of data minimisation and reasonable security 
+safeguards. POPIA requires appropriate technical and organisational measures to 
+protect personal information against loss, damage and unauthorised access or 
+--- PAGE 8 ---
+processing (Africa, 2013). 
+3.4.2 Data Integrity Rules 
+The following rules will be applied to maintain data accuracy and consistency. 
+Entity integrity: Each database table must have a primary key that uniquely identifies 
+every record. The primary keys are UserID, OfficerID, FineID, PaymentID, DisputeID 
+and NotificationID. These keys must not be null or duplicated. 
+Referential integrity: Foreign keys must refer to existing records. Fine.UserID must 
+reference an existing motorist, and Fine.OfficerID must reference an existing officer. 
+Payment.FineID, Dispute.FineID and Notification.FineID  must reference an existing 
+fine. These rules prevent orphan records. Foreign -key enforcement must be enabled 
+in SQLite. 
+Domain integrity: Each field must contain data of the correct type and format. For 
+example, fine amounts must be positive numbers, email addresses must follow an 
+acceptable format, dates must be valid and status fields must contain approved 
+values. 
+Business-rule integrity: The system must prevent a motorist from paying the same 
+fine more than once. In the prototype, each fine may have no more than one full 
+payment record and no more than one dispute record. A fine with an open dispute 
+must not receive an additional prototyp e penalty while the dispute is being reviewed. 
+Once a payment is successful, the fine status must be updated to Paid. 
+Security and confidentiality: Passwords must be stored as secure password hashes 
+rather than plain text. Role -based access controls must prevent motorists from 
+accessing another motorist's information or performing officer -only functions. These 
+safeguards support the protection of personal information required by POPIA. 
+Auditability: Important actions, including fine creation, payment attempts, dispute 
+decisions and changes to licence -status flags, should be recorded with dates and 
+times. Fine records should be marked as cancelled or otherwise updated where 
+appropriate instead of being physically deleted, so that the prototype can preserve a 
+history of relevant actions. 
+3.4.3 Data Constraints 
+The database will use the following constraints to reduce invalid or inconsistent 
+records: 
+• User.IDNumber: Required and unique, with exactly 13 digits for the South 
+African ID -number format used by the prototype. Validation must check the 
+format and, where implemented, the applicable checksum. Fictitious test values 
+will be used. 
+• User.Phone: Required and validated against an accepted South African 
+mobile-number format. 
+--- PAGE 9 ---
+• User.Email: Required, unique and checked for an acceptable email format. 
+• User.PasswordHash: Required and stored as a password hash using an 
+appropriate password-hashing method. 
+• User.LicenceStatus: Restricted to the prototype values Valid and Flagged. 
+• Fine.Amount: Required and greater than zero. 
+• Fine.PenaltyAmount: Must not be negative and will default to zero. 
+• Fine.IssueDate and Fine.DueDate: Both required, with the due date later than 
+the issue date and the issue date not in the future. 
+• Fine.Status: Restricted to Unpaid, Paid, Disputed, Overdue or Cancelled. 
+• Payment.FineID: A foreign key and unique value in the prototype, ensuring no 
+more than one payment record per fine. 
+• Dispute.FineID: A foreign key and unique value in the prototype, ensuring no 
+more than one dispute record per fine. 
+• Notification.FineID: A foreign key referencing an existing fine; multiple 
+notifications may be associated with one fine. 
+These constraints must be implemented in the database where possible, supported 
+by application-level validation and verified through testing. The detailed field definitions 
+are provided in the data dictionary in Section 3.8. 
+3.4.4 Prototype Business Rules and Assumed Thresholds 
+The reminder, penalty and licence -status rules are configurable assumptions 
+introduced for the NatiFine SA academic prototype. They are not presented as official 
+South African traffic -fine deadlines, statutory penalty amounts or legal licence -
+disqualification rules. 
+For demonstration purposes, the proposed system will apply the following rules: 
+1. First reminder: A simulated reminder is generated when a fine remains unpaid 
+for 14 days after its issue date. 
+2. Additional penalty: A configurable prototype penalty is applied once when a 
+fine remains unpaid for 30 days after its issue date. The penalty amount and 
+calculation method must be defined in the system configuration. 
+3. Licence-status flag: The motorist's prototype licence -status field is changed 
+to Flagged when an eligible fine remains unpaid for 60 days after its issue date. 
+This is only an internal demonstration flag and does not represent an actual 
+change to a driver's legal licence status. 
+4. Disputed fines: An additional prototype penalty is not applied while a dispute 
+remains open. When the dispute is resolved, the fine's status and any 
+subsequent processing must follow the configured prototype rules. 
+--- PAGE 10 ---
+5. Successful payment: Once a simulated payment succeeds, the fine is marked 
+Paid, the payment record is retained, and no further unpaid -fine reminders or 
+additional penalties are generated for that fine. 
+6. Status restoration:  The prototype licence -status flag is cleared when the 
+motorist has no remaining eligible overdue fines under the configured rules. 
+The thresholds will be stored as configurable values so that they can be changed 
+without redesigning the database. Actual traffic -fine procedures and applicable 
+deadlines depend on the relevant legal framework and circumstances. The 
+Department of Transport has also published implementation updates concerning the 
+phased implementation of AARTO, demonstrating why the prototype's simplified rules 
+should not be treated as a substitute for current official procedures  (Government, 
+2025). 
+These business rules provide a consistent basis for demonstrating reminders, 
+simulated penalties and status updates during development and testing. All such 
+actions will occur within the prototype and will not affect real fines, bank accounts or 
+driving licences. 
+ 
+3.4.5 
+ Weaknesses of the Current System 
+The following weaknesses were identified from the observation, participation and 
+interview findings and the Phase 2 investigation. Each is linked to the requirement in 
+section 3.6 that addresses it. 
+No. Weakness Effect Addressed by 
+1 Fragmented systems Each municipality keeps its own 
+records, so there is no complete 
+view of a motorist’s fines. 
+FR2, FR3 
+2 Fines linked to address, 
+not ID 
+Fines are posted to outdated or 
+wrong addresses and never 
+reach the motorist. 
+FR1, FR3 
+3 Late discovery of fines Motorists often learn of fines only 
+at licence renewal, after 
+penalties have accumulated. 
+FR4, FR8 
+4 Slow, postal notification There is delay between the 
+offence and the motorist 
+knowing; no photographic 
+evidence is attached. 
+FR4 
+5 Manual or in-person 
+payment 
+Queues, travel and office hours 
+inconvenience motorists and 
+burden staff. 
+FR5 
+--- PAGE 11 ---
+No. Weakness Effect Addressed by 
+6 Difficult dispute process Representations are paper-
+based and hard to track, leaving 
+motorists without status updates. 
+FR6 
+7 No automatic reminders 
+or escalation 
+Unpaid fines depend on manual 
+follow-up, so revenue is lost and 
+penalties are inconsistent. 
+FR7, FR8, FR9 
+8 Poor visibility for 
+authorities 
+Staff cannot easily see which 
+notices were received, paid or 
+contested. 
+FR10 
+9 Data quality and 
+duplication risk 
+Inconsistent formats between 
+systems lead to duplicate or 
+mismatched records. 
+Section 3.4 
+constraints 
+ 
+3.4 
+ Analysis of the Proposed System 
+NatiFine SA replaces the fragmented, address -based process with one centralized  
+web application in which all fines are held against the motorist’s ID number. This 
+section lists what the system must do. Requirement identifiers FR1 to FR12 are used 
+so that they can be traced through design, development and testing stages. 
+3.6.1 Actors 
+Actor Description 
+Motorist Registered citizen who views, pays and disputes fines and 
+receives notifications. 
+Traffic Officer / 
+Admin 
+Authorised user who captures fines against a motorist’s ID 
+number and reviews disputes. 
+System 
+(scheduler) 
+Automated process that sends reminders, applies penalties 
+and updates licence status. 
+Simulated 
+payment / 
+messaging 
+services 
+Internal simulations that stand in for banks and SMS / 
+WhatsApp providers. 
+ 
+ 
+ 
+ 
+--- PAGE 12 ---
+ 
+ 
+3.4.2 
+ Functional Requirement 
+ID Requirement Description Priority 
+FR1 Registration 
+and 
+authentication 
+A motorist can register with ID number, 
+name, surname, phone, email and 
+password, and log in. Passwords are 
+hashed. Officers/admins log in 
+separately with role-based access. 
+Must have 
+FR2 View fines A logged-in motorist sees all fines linked 
+to their ID number showing date, 
+location, amount, penalty, status and 
+photo, with filtering by status. 
+Must have 
+FR3 ID-based 
+centralised 
+record 
+All fines are stored in one database and 
+found by ID number, regardless of the 
+issuing officer or location. 
+Must have 
+FR4 Fine notification When a fine is added, the system 
+generates a simulated SMS and a 
+WhatsApp-style message with the fine 
+photo and logs it in the notification 
+history. 
+Must have 
+FR5 Online payment A motorist selects an unpaid fine, 
+confirms the amount (including any 
+penalty) and completes a simulated 
+payment. The system issues a receipt 
+and marks the fine Paid. 
+Must have 
+FR6 Dispute a fine A motorist submits a dispute form for a 
+fine with a reason and optional evidence, 
+and can track its status (Submitted, 
+Under Review, Upheld, Rejected). 
+Must have 
+FR7 Automatic 
+reminders 
+The scheduler sends reminders for fines 
+unpaid after the configured period and 
+records each reminder. 
+Must have 
+FR8 Licence status 
+flag 
+If a fine remains unpaid beyond the 
+threshold, the motorist’s LicenceStatus 
+is set to Flagged, and cleared when the 
+fines are settled. 
+Must have 
+FR9 Additional 
+penalties 
+When the threshold passes, a penalty 
+amount is recorded against the fine once 
+and shown to the motorist. 
+Must have 
+--- PAGE 13 ---
+ID Requirement Description Priority 
+FR10 Officer / admin 
+interface 
+An authorised user can capture new 
+fines by ID number, view fines and 
+payments, and update dispute decisions. 
+Must have 
+FR11 Receipts and 
+payment history 
+A motorist can view and print receipts for 
+paid fines. 
+Should have 
+FR12 Profile 
+management 
+A motorist can update phone and email 
+and change their password. 
+Should have 
+ 
+3.4.3 
+ Use Case Overview 
+Use case Actor Brief flow 
+Register / Log in Motorist, Officer Enter credentials → system 
+validates → session started. 
+Capture fine Officer / Admin Enter ID number and offence 
+details → system validates → fine 
+stored → notification triggered. 
+View fines Motorist Log in → open “My Fines” → 
+system returns fines for that ID. 
+Pay fine Motorist Select fine → confirm amount → 
+simulated payment → receipt → 
+status Paid. 
+Dispute fine Motorist Select fine → submit reason and 
+evidence → status Disputed → 
+admin decision. 
+Review dispute Officer / Admin Open dispute → view evidence → 
+record decision → motorist 
+notified. 
+Send reminders / apply 
+penalties 
+System Scheduler checks fine ages → 
+sends reminder, adds penalty, 
+flags licence as thresholds are 
+reached. 
+ 
+3.4.4 
+ Data Flow Analysis 
+The context diagram shows the system as a single process and its interaction with 
+external entities. Level 1 decomposes it into five processes and six data stores that 
+correspond to the entities in section 3.8. 
+--- PAGE 14 ---
+This is the context diagram:
+ 
+Below is the Data Flow Diagram:  
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 15 ---
+3.4.5 
+ Assumptions and Constraints Carried Forward 
+The assumptions and constraints from Phase 2 continue to apply: users have basic 
+digital skills and access to a phone or computer; all data is fictitious; the project runs 
+on a 10-week schedule with three developers; and no paid infrastructure or third-party 
+notification services are used. Live government, banking and SMS / WhatsApp 
+integration is out of scope and is simulated. 
+ 
+3.5 
+ Non-Functional Requirements 
+Non-functional requirements describe the quality attributes of the system. Those listed 
+in Phase 2 are retained and are here made measurable so that they can be verified 
+during the Testing sprint. 
+ID Attribute Requirement How it will be verified 
+NFR1 Usability A first-time user can view and 
+pay a fine within a few clicks 
+(no more than five steps from 
+login). Layouts are consistent, 
+responsive, and use clear 
+labels and error messages. 
+Walkthrough with test 
+users; count of steps 
+NFR2 Performance A user’s fine list loads in under 
+2 seconds on the prototype 
+database; payment and dispute 
+submission respond within 3 
+seconds. 
+Timed tests with 
+sample data 
+NFR3 Security Passwords are salted and 
+hashed. Only the authenticated 
+owner can view or pay their 
+fines. Officer functions require 
+the officer role. Inputs are 
+validated and queries are 
+parameterized to prevent SQL 
+injection, and output is escaped 
+to prevent XSS. Sessions 
+expire after inactivity. 
+Test cases on access 
+control and invalid input 
+NFR4 Reliability The prototype runs through the 
+full demo scenario (register, 
+view, pay or dispute) without 
+crashing. Failed payments or 
+errors leave data in a 
+consistent state. 
+End-to-end test; error-
+case tests 
+NFR5 Availability Available during development, 
+testing and demonstration 
+sessions rather than 24/7. 
+Demo-day readiness 
+check 
+--- PAGE 16 ---
+ID Attribute Requirement How it will be verified 
+NFR6 Maintainability Code is organized into modules 
+(authentication, fines, 
+payments, notifications) with 
+comments and naming 
+standards so any team member 
+can maintain it. 
+Code review 
+NFR7 Data integrity All constraints in section 3.4 are 
+enforced at database level, not 
+only in the user interface. 
+Attempt to insert invalid 
+data 
+NFR8 Compatibility / 
+portability 
+Works in current versions of 
+Chrome, Edge and Firefox on 
+desktop and mobile screens, 
+with no installation beyond a 
+browser. 
+Cross-browser check 
+NFR9 Privacy Only the minimum personal 
+data needed is stored and is 
+displayed only to its owner and 
+authorized officers, in the spirit 
+of POPIA. Prototypes use 
+fictitious data only. 
+Review of stored fields 
+NFR10 Auditability Key events (fine creation, 
+payment, dispute decision, 
+license flag change) are time-
+stamped so history can be 
+traced. 
+Inspect records after 
+test run 
+ 
+ 
+3.8 Data Modelling 
+Phase 2 listed the principal entities. This section expands them into a full entity 
+relationship model, a data dictionary and a normalization check. It also corrects the 
+Officer/Admin relationship, which Phase 2 described incorrectly: the relationship is that 
+one officer issues many fines, and each fine is issued by exactly one officer. 
+ 
+ 
+ 
+ 
+ 
+--- PAGE 17 ---
+3.8.1 Entities and Relationships 
+Relationship Cardinality Explanation 
+User receives Fine 1 : N One motorist can have many fines. Each 
+fine belongs to exactly one motorist. 
+Officer issues Fine 1 : N One officer can issue many fines. Each 
+fine records exactly one issuing officer. 
+Fine settled by Payment 1 : 0.1 A fine has no payment or one full 
+payment in the prototype. 
+Fine contested by Dispute 1 : 0.1 A fine has no dispute or one dispute. A 
+user may submit multiple disputes 
+through their different fines. 
+Fine triggers Notification 1 : N A fine can have many notifications 
+(initial alert, reminders, payment 
+confirmation). 
+Entity Relationship Diagram for NatiFine SA. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 18 ---
+3.8.2 Data Dictionary 
+Types are give for SQLite, PK= Primary Key, FK = Foreign Key 
+USER (Motorist) 
+Attribute Type Key Notes 
+UserID INTEGER PK Auto-increment 
+IDNumber TEXT(13) UNIQUE South African ID number 
+Name TEXT  Not null 
+Surname TEXT  Not null 
+Phone TEXT  Not null; used for notifications 
+Email TEXT UNIQUE Valid email 
+PasswordHash TEXT  Salted hash 
+LicenceStatus TEXT  Valid / Flagged, default Valid 
+ 
+OFFICER 
+Attribute Type Key Notes 
+OfficerID INTEGER PK Auto-increment 
+Name TEXT  Not null 
+BadgeNo TEXT UNIQUE Badge / employee number 
+Station TEXT  Issuing station or department 
+PasswordHash TEXT  Salted hash (added to support officer 
+login, FR1 and FR10) 
+Role TEXT  Officer / Admin 
+ 
+FINE 
+Attribute Type Key Notes 
+FineID INTEGER PK Auto-increment 
+UserID INTEGER FK References User 
+OfficerID INTEGER FK References Officer 
+IssueDate DATE  Not null, not in the future 
+DueDate DATE  Not null, after IssueDate (added to 
+drive reminders) 
+Location TEXT  Where the offence occurred 
+--- PAGE 19 ---
+Attribute Type Key Notes 
+Offence TEXT  Offence description (added for 
+clarity) 
+Amount DECIMAL(10,2)  Greater than 0 
+PenaltyAmount DECIMAL(10,2)  Default 0 
+Status TEXT  Unpaid / Paid / Disputed / Overdue / 
+Cancelled 
+PhotoURL TEXT  Path to the fine photograph 
+ 
+PAYMENT 
+Attribute Type Key Notes 
+PaymentID INTEGER PK Auto-increment 
+FineID INTEGER FK, 
+UNIQUE 
+References Fine; one payment per 
+fine 
+Amount DECIMAL(10,2)  Amount paid 
+PaymentDate DATETIME  Time of simulated payment 
+Method TEXT  Simulated: Card / EFT 
+Status TEXT  Successful / Failed 
+ 
+DISPUTE 
+Attribute Type Key Notes 
+DisputeID INTEGER PK Auto-increment 
+FineID INTEGER FK, 
+UNIQUE 
+References Fine; one dispute per fine 
+Reason TEXT  Not null 
+EvidenceURL TEXT  Optional uploaded evidence 
+DateSubmitted DATETIME  Not null 
+Status TEXT  Submitted / Under Review / Upheld / 
+Rejected 
+ 
+--- PAGE 20 ---
+ 
+NOTIFICATION 
+Attribute Type Key Notes 
+NotificationID INTEGER PK Auto-increment 
+FineID INTEGER FK References Fine 
+Type TEXT  SMS / WhatsApp 
+Message TEXT  Message content 
+SentDate DATETIME  Time sent (simulated) 
+ 
+3.8.3 Normalization Check 
+First Normal Form (1NF): every attribute holds a single atomic value and every table has a 
+primary key; there are no repeating groups (multiple notifications and payments are separate 
+rows in their own tables). 
+Second Normal Form (2NF): all tables use a single-column primary key, so no non-key 
+attribute depends on only part of a key. 
+Third Normal Form (3NF): non-key attributes depend only on the key. Motorist details live 
+only in User, officer details only in Officer, and Fine stores references (UserID, OfficerID) 
+instead of copying names. The model is therefore in 3NF. 
+Design note. PenaltyAmount is stored on Fine as required in Phase 2. It is derived from the 
+Amount and the penalty rule, so it is deliberately recorded as a historical value (the penalty 
+applied at that time) rather than recalculated, which protects the record if penalty rules change 
+later. 
+ 
+3.8.4 Changes from the Phase 2 Data Model
+ 
+Change Reason 
+Added PasswordHash 
+and Role to Officer 
+Officers and admins must authenticate (FR1, FR10, 
+NFR3). 
+Added DueDate and 
+Offence to Fine 
+Needed for reminder timing and to describe the fine 
+(FR2, FR7). 
+Corrected the Officer–
+Fine relationship to 1 : N 
+The Phase 2 wording referred to disputes, but the 
+officer’s relationship is to the fines issued. 
+Added UNIQUE 
+constraints on 
+Payment.FineID and 
+Dispute.FineID 
+Enforces the 0.1 relationships at database level. 
+ 
+--- PAGE 21 ---
+Conclusion 
+The Analysis Phase has shown how fines are handled today, why that process fails 
+motorists and authorities, and what NatiFine SA must do to fix it. Twelve functional 
+requirements, ten non -functional requirements, a set of integrity constraints and a 
+normalized six-entity data model now define the prototype precisely. These outputs 
+feed directly into the Design phase, where screens, database scripts and module 
+structure will be produced, and into the Testing sprint, where each requirement will be 
+checked. 
+ 
+References 
+Africa, S., 2013. Protection of Personal Information Act 4 of 2013.. [Online]  
+Available at: https://www.gov.za/documents/protection-personal-information-act 
+[Accessed 07 October 2026]. 
+Government, S. A., 2010. What to do when receiving an infringement notice – Administrative 
+Adjudication of Road Traffic Offences Act (AARTO).. [Online]  
+Available at: https://www.gov.za/news/media-statements/what-do-when-receiving-
+infringement-notice-%E2%80%93-administrative-adjudication-road 
+[Accessed 07 October 2026]. 
+Government, S. A., 2025. Transport defers AARTO Act to 1 July 2026.. [Online]  
+Available at: https://www.gov.za/news/media-statements/transport-defers-aarto-act-1-july-
+2026-10-nov-2025 
+[Accessed 08 October 2026]. 
+ 
+ 
