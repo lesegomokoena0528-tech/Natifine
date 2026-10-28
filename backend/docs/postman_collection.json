@@ -1,0 +1,56 @@
+{
+  "info": {
+    "_postman_id": "f9b73d6d-aec1-4f5f-9d67-4d2b4d9f001",
+    "name": "NatiFine API",
+    "description": "Production API Collection for the NatiFine Traffic Fine Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+
+  "variable": [
+
+    {
+      "key": "base_url",
+      "value": "http://localhost:5000"
+    },
+
+    {
+      "key": "access_token",
+      "value": ""
+    },
+
+    {
+      "key": "refresh_token",
+      "value": ""
+    },
+
+    {
+      "key": "user_id",
+      "value": ""
+    },
+
+    {
+      "key": "vehicle_id",
+      "value": ""
+    },
+
+    {
+      "key": "fine_id",
+      "value": ""
+    },
+
+    {
+      "key": "payment_id",
+      "value": ""
+    },
+
+    {
+      "key": "dispute_id",
+      "value": ""
+    }
+
+  ],
+
+  "item": [
+
+  ]
+}
