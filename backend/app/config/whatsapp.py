@@ -1,0 +1,13 @@
+import os
+
+WHATSAPP_API_URL = os.getenv(
+    "WHATSAPP_API_URL"
+)
+
+WHATSAPP_PHONE_NUMBER_ID = os.getenv(
+    "WHATSAPP_PHONE_NUMBER_ID"
+)
+
+WHATSAPP_ACCESS_TOKEN = os.getenv(
+    "WHATSAPP_ACCESS_TOKEN"
+)

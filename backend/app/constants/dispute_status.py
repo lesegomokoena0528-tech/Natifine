@@ -1,0 +1,18 @@
+from enum import Enum
+
+
+class DisputeStatus(Enum):
+
+    NEW = "NEW"
+
+    PENDING = "PENDING"
+
+    UNDER_REVIEW = "UNDER_REVIEW"
+
+    MORE_INFORMATION_REQUIRED = "MORE_INFORMATION_REQUIRED"
+
+    APPROVED = "APPROVED"
+
+    REJECTED = "REJECTED"
+
+    CLOSED = "CLOSED"
