@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Officers · NatiFine SA</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a4d8c'/><text x='50' y='68' font-size='54' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>NF</text></svg>">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-scrim hidden" id="scrim"></div>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <h1>Officers</h1>
+            <p>Enforcement officers and their platform activity.</p>
+          </div>
+          <button class="btn" id="add" type="button">Add officer</button>
+        </div>
+
+        <div class="stat-grid mb-24">
+          <div class="stat"><div class="stat-label">Officers</div><div class="stat-value" id="t-officers">—</div><div class="stat-sub">Active &amp; inactive</div></div>
+          <div class="stat"><div class="stat-label">Total users</div><div class="stat-value" id="t-users">—</div><div class="stat-sub">All accounts</div></div>
+          <div class="stat accent"><div class="stat-label">Fines issued</div><div class="stat-value" id="t-fines">—</div><div class="stat-sub">Platform total</div></div>
+          <div class="stat warn"><div class="stat-label">Revenue</div><div class="stat-value" id="t-revenue">—</div><div class="stat-sub">Collected</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="filter-bar">
+              <div class="form-group flex-1">
+                <label class="sr-only" for="search">Search</label>
+                <input class="input" id="search" placeholder="Search officers by name, email or ID number…">
+              </div>
+              <div class="form-group">
+                <label for="status">Status</label>
+                <select class="select" id="status">
+                  <option value="">All statuses</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="INACTIVE">Inactive</option>
+                  <option value="SUSPENDED">Suspended</option>
+                </select>
+              </div>
+              <div class="form-group"><button class="btn btn-secondary" id="refresh" type="button">Refresh</button></div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>ID number</th><th>Phone</th><th>Status</th><th>Joined</th><th class="actions">Actions</th></tr>
+              </thead>
+              <tbody id="rows"><tr><td colspan="6"><div class="spinner"></div></td></tr></tbody>
+            </table>
+          </div>
+          <div class="card-footer" id="pager"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="/assets/js/config.js"></script>
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/app.js"></script>
+  <script>NFShell.mount({ role: "admin", active: "officers", title: "Officers", subtitle: "Enforcement officer management" });</script>
+  <script src="/assets/js/pages/admin-officers.js"></script>
+</body>
+</html>

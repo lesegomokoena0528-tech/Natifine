@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profile · NatiFine SA</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a4d8c'/><text x='50' y='68' font-size='54' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>NF</text></svg>">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-scrim hidden" id="scrim"></div>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <h1>Profile</h1>
+            <p>Your account details and password.</p>
+          </div>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-header"><h2>Account details</h2></div>
+            <div class="card-body">
+              <div class="flex items-center gap-16 mb-24">
+                <span class="avatar avatar-lg" id="pro-avatar">—</span>
+                <div>
+                  <h2 class="mb-0" id="pro-name">—</h2>
+                  <div class="small text-muted" id="pro-role">—</div>
+                  <div class="mt-8" id="pro-status"></div>
+                </div>
+              </div>
+              <dl class="kv" id="kv-rows"></dl>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2>Change password</h2></div>
+            <div class="card-body">
+              <form id="pw-form" novalidate>
+                <div class="form-group">
+                  <label for="pw-current">Current password <span class="req">*</span></label>
+                  <input class="input" type="password" id="pw-current" name="current_password" autocomplete="current-password" required>
+                  <div class="field-error" data-error-for="current_password"></div>
+                </div>
+                <div class="form-group">
+                  <label for="pw-new">New password <span class="req">*</span></label>
+                  <input class="input" type="password" id="pw-new" name="new_password" autocomplete="new-password" required>
+                  <div class="field-error" data-error-for="new"></div>
+                </div>
+                <div class="form-group">
+                  <label for="pw-confirm">Confirm new password <span class="req">*</span></label>
+                  <input class="input" type="password" id="pw-confirm" name="confirm" autocomplete="new-password" required>
+                  <div class="field-error" data-error-for="confirm"></div>
+                </div>
+                <button class="btn" type="submit" id="pw-submit">Update password</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="/assets/js/config.js"></script>
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/app.js"></script>
+  <script>NFShell.mount({ role: "admin", active: "profile", title: "Profile", subtitle: "Account settings" });</script>
+  <script src="/assets/js/pages/shared-profile.js"></script>
+</body>
+</html>
