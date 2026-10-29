@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Register · NatiFine SA</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a4d8c'/><text x='50' y='68' font-size='54' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>NF</text></svg>">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <div class="auth-wrap">
+    <aside class="auth-aside">
+      <a class="brand" href="/" style="color:#fff">
+        <span class="brand-mark">NF</span>
+        <span>NatiFine<small style="color:rgba(255,255,255,.6)">South Africa</small></span>
+      </a>
+      <div>
+        <h1 style="color:#fff;font-size:2.1rem">Join NatiFine SA.</h1>
+        <p style="color:rgba(255,255,255,.85);max-width:420px">Create your motorist profile to manage fines, make payments and submit disputes online.</p>
+        <ul style="color:rgba(255,255,255,.85);padding-left:20px;line-height:2">
+          <li>Free to register</li>
+          <li>Link multiple vehicles</li>
+          <li>Download official receipts</li>
+        </ul>
+      </div>
+      <p class="small" style="color:rgba(255,255,255,.6)">Academic prototype · simulated services</p>
+    </aside>
+
+    <main class="auth-main">
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <a href="/pages/login.html">Sign in</a>
+          <a class="active" href="/pages/register.html">Register</a>
+        </div>
+        <div class="card card-pad">
+          <h2>Create your account</h2>
+          <p class="text-muted">All fields are required. Your ID number must be 13 digits.</p>
+
+          <div id="reg-alert" class="alert alert-danger hidden" role="alert"></div>
+
+          <form id="reg-form" novalidate>
+            <div class="grid grid-2" style="gap:0 14px">
+              <div class="form-group">
+                <label for="first_name">First name <span class="req">*</span></label>
+                <input class="input" id="first_name" name="first_name" autocomplete="given-name" required>
+                <div class="field-error" data-error-for="first_name"></div>
+              </div>
+              <div class="form-group">
+                <label for="last_name">Last name <span class="req">*</span></label>
+                <input class="input" id="last_name" name="last_name" autocomplete="family-name" required>
+                <div class="field-error" data-error-for="last_name"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="id_number">SA ID number <span class="req">*</span></label>
+              <input class="input" id="id_number" name="id_number" inputmode="numeric" maxlength="13" placeholder="13 digits" required>
+              <div class="field-error" data-error-for="id_number"></div>
+            </div>
+            <div class="form-group">
+              <label for="email">Email address <span class="req">*</span></label>
+              <input class="input" id="email" name="email" type="email" autocomplete="email" required>
+              <div class="field-error" data-error-for="email"></div>
+            </div>
+            <div class="form-group">
+              <label for="phone">Cellphone number <span class="req">*</span></label>
+              <input class="input" id="phone" name="phone" inputmode="tel" placeholder="0821234567" autocomplete="tel" required>
+              <div class="field-error" data-error-for="phone"></div>
+            </div>
+            <div class="grid grid-2" style="gap:0 14px">
+              <div class="form-group">
+                <label for="password">Password <span class="req">*</span></label>
+                <input class="input" id="password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+                <div class="field-error" data-error-for="password"></div>
+              </div>
+              <div class="form-group">
+                <label for="confirm">Confirm password <span class="req">*</span></label>
+                <input class="input" id="confirm" type="password" autocomplete="new-password" required>
+                <div class="field-error" data-error-for="confirm"></div>
+              </div>
+            </div>
+            <p class="field-hint" style="margin-top:-6px">At least 8 characters.</p>
+            <button class="btn btn-lg btn-block" type="submit" id="reg-btn">Create account</button>
+          </form>
+
+          <p class="text-center mt-16 small text-muted">Already registered? <a href="/pages/login.html">Sign in</a></p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/assets/js/config.js"></script>
+
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/app.js"></script>
+  <script>
+    (function () {
+      var role = Session.role();
+      if (Session.isLoggedIn() && role) { window.location.replace("/pages/" + role + "/dashboard.html"); return; }
+
+      var form = document.getElementById("reg-form");
+      var btn = document.getElementById("reg-btn");
+      var alertBox = document.getElementById("reg-alert");
+
+      function showError(msg) { alertBox.textContent = msg; alertBox.classList.remove("hidden"); }
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        alertBox.classList.add("hidden");
+        NF.formErrors(form, null);
+
+        var payload = {
+          first_name: form.first_name.value.trim(),
+          last_name: form.last_name.value.trim(),
+          id_number: form.id_number.value.trim(),
+          email: form.email.value.trim(),
+          phone: form.phone.value.trim(),
+          password: form.password.value
+        };
+
+        if (!/^\d{13}$/.test(payload.id_number)) { showError("Your SA ID number must be exactly 13 digits."); return; }
+        if (payload.password.length < 8) { showError("Password must be at least 8 characters."); return; }
+        if (payload.password !== form.confirm.value) {
+          var err = { confirm: ["Passwords do not match."] };
+          NF.formErrors(form, err);
+          showError("Passwords do not match.");
+          return;
+        }
+
+        NF.setLoading(btn, true, "Creating account…");
+        Api.register(payload).then(function () {
+          NF.toast("Account created. You can now sign in.", "success");
+          window.location.href = "/pages/login.html?registered=1";
+        }).catch(function (err) {
+          if (err.errors) NF.formErrors(form, err.errors);
+          showError(err.message || "Registration failed.");
+          NF.setLoading(btn, false);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

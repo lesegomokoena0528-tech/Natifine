@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · NatiFine SA</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a4d8c'/><text x='50' y='68' font-size='54' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>NF</text></svg>">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <div class="auth-wrap">
+    <aside class="auth-aside">
+      <a class="brand" href="/" style="color:#fff">
+        <span class="brand-mark">NF</span>
+        <span>NatiFine<small style="color:rgba(255,255,255,.6)">South Africa</small></span>
+      </a>
+      <div>
+        <h1 style="color:#fff;font-size:2.1rem">Welcome back.</h1>
+        <p style="color:rgba(255,255,255,.85);max-width:420px">Sign in to review your traffic fines, settle payments, track disputes and manage your vehicles.</p>
+        <ul style="color:rgba(255,255,255,.85);padding-left:20px;line-height:2">
+          <li>Real-time fine status and due dates</li>
+          <li>Secure simulated online payments with PDF receipts</li>
+          <li>Transparent dispute tracking</li>
+        </ul>
+      </div>
+      <p class="small" style="color:rgba(255,255,255,.6)">Academic prototype · simulated services</p>
+    </aside>
+
+    <main class="auth-main">
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <a class="active" href="/pages/login.html">Sign in</a>
+          <a href="/pages/register.html">Register</a>
+        </div>
+        <div class="card card-pad">
+          <h2>Sign in</h2>
+          <p class="text-muted">Use your email, ID number or cellphone number.</p>
+
+          <div id="login-alert" class="alert alert-danger hidden" role="alert"></div>
+
+          <form id="login-form" novalidate>
+            <div class="form-group">
+              <label for="username">Email, ID number or cellphone <span class="req">*</span></label>
+              <input class="input" id="username" name="username" autocomplete="username" placeholder="citizen@natifine.co.za" required>
+              <div class="field-error" data-error-for="username"></div>
+            </div>
+            <div class="form-group">
+              <label for="password">Password <span class="req">*</span></label>
+              <div class="input-group">
+                <input class="input" id="password" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required>
+                <button class="btn btn-secondary" type="button" id="toggle-pw" aria-label="Show password">Show</button>
+              </div>
+              <div class="field-error" data-error-for="password"></div>
+            </div>
+            <button class="btn btn-lg btn-block" type="submit" id="login-btn">Sign in</button>
+          </form>
+
+          <p class="text-center mt-16 small text-muted">Don't have an account? <a href="/pages/register.html">Register now</a></p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="/assets/js/config.js"></script>
+
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/app.js"></script>
+  <script>
+    (function () {
+      var role = Session.role();
+      if (Session.isLoggedIn() && role) {
+        window.location.replace("/pages/" + role + "/dashboard.html");
+        return;
+      }
+      var form = document.getElementById("login-form");
+      var btn = document.getElementById("login-btn");
+      var alertBox = document.getElementById("login-alert");
+      var pw = document.getElementById("password");
+
+      document.getElementById("toggle-pw").addEventListener("click", function () {
+        var show = pw.type === "password";
+        pw.type = show ? "text" : "password";
+        this.textContent = show ? "Hide" : "Show";
+      });
+
+      function showError(msg) {
+        alertBox.textContent = msg;
+        alertBox.classList.remove("hidden");
+      }
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+        alertBox.classList.add("hidden");
+        var username = form.username.value.trim();
+        var password = pw.value;
+        if (!username || !password) { showError("Please enter your username and password."); return; }
+
+        NF.setLoading(btn, true, "Signing in…");
+        Api.login(username, password).then(function (data) {
+          NF.toast("Signed in successfully.", "success");
+          var r = (data.user && data.user.role ? String(data.user.role) : "").toLowerCase();
+          var next = NF.param("next");
+          if (next && next.indexOf("/pages/") === 0) {
+            window.location.href = next;
+          } else {
+            window.location.href = "/pages/" + (r || "citizen") + "/dashboard.html";
+          }
+        }).catch(function (err) {
+          showError(err.message || "Unable to sign in.");
+          NF.setLoading(btn, false);
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
