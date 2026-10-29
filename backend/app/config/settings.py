@@ -6,13 +6,57 @@ def _bool_env(name, default="false"):
     return os.getenv(name, default).strip().lower() in ("1", "true", "yes", "on")
 
 
+def _is_vercel_environment():
+    return _bool_env("VERCEL") or bool(os.getenv("VERCEL_ENV"))
+
+
+def _database_url_from_env():
+    """Return the first configured managed-database URL.
+
+    Vercel + Neon (and most Postgres integrations) expose several names.
+    ``DATABASE_URL`` stays first for backwards compatibility, then the
+    Vercel/Neon variables. Blank values are ignored.
+    """
+    for name in (
+        "DATABASE_URL",
+        "POSTGRES_URL",
+        "POSTGRES_URL_NON_POOLING",
+    ):
+        value = os.getenv(name)
+        if value and value.strip():
+            value = value.strip().strip('"').strip("'")
+            break
+    else:
+        value = None
+
+    if _is_vercel_environment():
+        if not value:
+            raise RuntimeError(
+                "Vercel requires DATABASE_URL or POSTGRES_URL for the "
+                "persistent Postgres database."
+            )
+
+        normalized = _normalize_database_url(value)
+        if not normalized.startswith("postgresql+psycopg2://"):
+            raise RuntimeError(
+                "Vercel requires a Postgres URL in DATABASE_URL or "
+                "POSTGRES_URL; local MySQL settings are not persistent."
+            )
+
+    return value
+
+
 def _normalize_database_url(uri):
-    """Allow generic MySQL URLs from hosting providers."""
+    """Allow generic database URLs from hosting providers."""
     if not uri:
         return uri
-    # SQLAlchemy needs an explicit driver for MySQL.
+    # SQLAlchemy needs an explicit driver for MySQL and Postgres.
     if uri.startswith("mysql://"):
         uri = uri.replace("mysql://", "mysql+pymysql://", 1)
+    elif uri.startswith("postgres://"):
+        uri = uri.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif uri.startswith("postgresql://"):
+        uri = uri.replace("postgresql://", "postgresql+psycopg2://", 1)
     return uri
 
 
@@ -24,9 +68,9 @@ class Config:
     # ------------------------------------------------------
     # Database
     # ------------------------------------------------------
-    # Prefer an explicit DATABASE_URL (Render, managed MySQL).
+    # Prefer an explicit managed URL (Vercel Postgres/Neon, Render, managed MySQL).
     # Fall back to discrete DB_* variables for local development.
-    _database_url = _normalize_database_url(os.getenv("DATABASE_URL"))
+    _database_url = _normalize_database_url(_database_url_from_env())
 
     if _database_url:
         SQLALCHEMY_DATABASE_URI = _database_url
@@ -48,15 +92,30 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # Recycle connections before MySQL's idle timeout and verify liveness.
-    SQLALCHEMY_ENGINE_OPTIONS = {
-        "pool_pre_ping": True,
-        "pool_recycle": int(os.getenv("DB_POOL_RECYCLE", "280")),
-    }
+    # Recycle connections before the database's idle timeout and verify
+    # liveness. Serverless functions are short-lived, so keep the pool small
+    # and let the provider-side pooler (Neon pgbouncer) do the heavy lifting.
+    _database_uri_string = str(SQLALCHEMY_DATABASE_URI or "")
+    _engine_options = {}
 
-    if _bool_env("DB_SSL"):
+    if _database_uri_string.startswith(("mysql", "postgresql")):
+        _engine_options["pool_pre_ping"] = True
+        _engine_options["pool_recycle"] = int(
+            os.getenv("DB_POOL_RECYCLE", "280")
+        )
+
+    if _database_uri_string.startswith("postgresql"):
+        _engine_options.update({
+            "pool_size": int(os.getenv("DB_POOL_SIZE", "2")),
+            "max_overflow": int(os.getenv("DB_MAX_OVERFLOW", "3")),
+            "pool_timeout": int(os.getenv("DB_POOL_TIMEOUT", "10")),
+        })
+
+    if _bool_env("DB_SSL") and _database_uri_string.startswith("mysql"):
         # Managed MySQL (Aiven, PlanetScale-style) requires TLS.
-        SQLALCHEMY_ENGINE_OPTIONS["connect_args"] = {"ssl": {}}
+        _engine_options["connect_args"] = {"ssl": {}}
+
+    SQLALCHEMY_ENGINE_OPTIONS = _engine_options
 
     # ------------------------------------------------------
     # CORS
@@ -67,11 +126,25 @@ class Config:
     CORS_ORIGINS = [o.strip() for o in _cors.split(",") if o.strip()]
 
     # ------------------------------------------------------
-    # Uploads
+    # Uploads / Blob storage
     # ------------------------------------------------------
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
 
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+    # auto = use Vercel Blob when credentials are present, otherwise local disk.
+    # Force with "local" or "vercel_blob".
+    STORAGE_BACKEND = os.getenv("STORAGE_BACKEND", "auto")
+    BLOB_READ_WRITE_TOKEN = (
+        os.getenv("BLOB_READ_WRITE_TOKEN")
+        or os.getenv("VERCEL_BLOB_READ_WRITE_TOKEN")
+    )
+    BLOB_STORE_ID = os.getenv("BLOB_STORE_ID")
+    BLOB_ACCESS = os.getenv("BLOB_ACCESS", "private")
+
+    # Vercel Functions limit request bodies to 4.5 MB. Keep the default below
+    # that limit; override locally if larger uploads are needed.
+    MAX_CONTENT_LENGTH = int(
+        os.getenv("MAX_CONTENT_LENGTH", str(4 * 1024 * 1024))
+    )
 
     # ------------------------------------------------------
     # Email (SMTP)

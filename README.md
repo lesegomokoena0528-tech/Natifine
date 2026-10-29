@@ -6,7 +6,8 @@ It consists of a **Flask REST API** (`backend/`) and a **plain HTML/CSS/JS front
 
 - Backend: Flask 3.1 + SQLAlchemy + MySQL (PyMySQL) + Flask-Migrate, JWT auth.
 - Frontend: static site (vanilla JS), currently served by Flask locally.
-- Production target: **Render** (API) + **Vercel** (static frontend) + **managed MySQL**.
+- Production target: **Vercel Services** (frontend + Flask API) + **Vercel
+  Postgres/Neon** + **Vercel Blob**.
 
 > This project is not connected to any real government or payment infrastructure.
 
@@ -98,10 +99,13 @@ See `backend/.env.example`. Key variables:
 | `SECRET_KEY`        | Flask signing key (generate a strong random value)             |
 | `JWT_SECRET_KEY`    | JWT signing key (independent strong random value)              |
 | `DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD` | Local MySQL connection        |
-| `DATABASE_URL`      | Production override; `mysql://` auto-upgrades to `mysql+pymysql://` |
+| `DATABASE_URL` / `POSTGRES_URL` | Managed Postgres URL (Vercel/Neon); `postgres://` auto-upgrades to `postgresql+psycopg2://` |
 | `DB_SSL`            | `true` to require TLS to a managed MySQL server                |
 | `CORS_ORIGINS`      | Comma-separated browser origins allowed to call the API        |
-| `UPLOAD_FOLDER`     | Upload directory                                               |
+| `STORAGE_BACKEND`   | `auto` (default), `local`, or `vercel_blob`                    |
+| `BLOB_ACCESS`       | `private` or `public`; must match the Blob store mode          |
+| `BLOB_READ_WRITE_TOKEN` / `BLOB_STORE_ID` | Injected by the Vercel Blob integration      |
+| `UPLOAD_FOLDER`     | Local fallback upload directory                                |
 | `MAIL_*`            | Email config (simulated; `MAIL_SUPPRESS_SEND=true`)            |
 | `LOG_LEVEL`         | Gunicorn / app log level                                       |
 
@@ -115,75 +119,83 @@ python -c "import secrets; print(secrets.token_hex(32))"
 
 ## 4. Database & migrations
 
-- Engine: MySQL via `mysql+pymysql`.
-- Migrations live in `backend/migrations/` (Alembic). Head revision:
-  `fd274eb3c917` (initial schema — creates all 11 tables in dependency order).
-  It was regenerated from the models because the earlier chain was incomplete
-  (it referenced `traffic_fines` before that table existed).
-- Apply migrations: `flask db upgrade`. Create one: `flask db migrate -m "message"`.
+- Local development: MySQL via `mysql+pymysql`.
+- Production: Postgres (Vercel/Neon) via `postgresql+psycopg2`.
+- Set `DATABASE_URL` or `POSTGRES_URL` to the managed Postgres connection
+  string. `postgres://` is upgraded to `postgresql+psycopg2://` automatically.
+- Migrations live in `backend/migrations/` (Alembic). The initial migration is
+  portable: it creates native Postgres enum types once and uses regular
+  `sa.Enum` columns on MySQL.
+- Apply migrations against the managed database:
+  `flask db upgrade`. Create one: `flask db migrate -m "message"`.
 - **Do not** use `db.create_all()` against the production database.
 - Back up the database before applying migrations.
 
-If the data currently exists only in a local MySQL instance, export it and import
-it into the managed database before pointing Render at it:
-
-```powershell
-# export (structure + data)
-mysqldump -u root -p --databases natifine > natifine_backup.sql
-# import into the managed database (provider host/credentials)
-mysql -h <host> -P <port> -u <user> -p < natifine_backup.sql
-```
+If data currently exists only in local MySQL, migrate it explicitly (for example
+with `pgloader`) before pointing the deployed app at Postgres. Uploaded files and
+receipts are not part of the SQL dump.
 
 ---
 
-## 5. Backend deployment — Render
+## 5. Deployment �?" Vercel Services (frontend + backend)
 
-1. Push the repository to GitHub (see section 7).
-2. Render Dashboard → **New → Blueprint** (uses `render.yaml`) **or** **New → Web Service**.
-   - Root Directory: `backend`
-   - Runtime: Python 3.13 (`PYTHON_VERSION=3.13.0`)
-   - Build command: `pip install --upgrade pip && pip install -r requirements.txt`
-   - Start command: `gunicorn -c gunicorn.conf.py "app.factory:create_app()"`
-   - Health check path: `/healthz`
-3. Set environment variables in the Render dashboard (do **not** commit them):
-   `SECRET_KEY`, `JWT_SECRET_KEY`, `DATABASE_URL` (or `DB_*`), `DB_SSL`,
-   `CORS_ORIGINS` (add the Vercel URL after step 6), `FLASK_ENV=production`.
-4. Deploy. Confirm logs show a clean start and no credentials printed.
-5. Verify: `GET https://<your-service>.onrender.com/healthz` → `{"status":"ok",...}`.
-6. Swagger UI: `https://<your-service>.onrender.com/apidocs/`.
+The repository root contains `vercel.json`, which deploys both apps as one
+Vercel project:
 
-The start command uses the Flask **application factory** `app.factory:create_app()`
-(the same entry point as `flask --app app.factory run`). Gunicorn binds
-`0.0.0.0:$PORT` and is never run in Flask debug mode.
+- `frontend/` — static site (`framework: null`, no build step).
+- `backend/` — Flask WSGI app exposed by `backend/index.py` as `app`.
+- Requests to `/api/*` and `/healthz` go to the backend; everything else goes to
+  the frontend. Both share one origin, so no CORS setup is required.
 
----
+Steps:
 
-## 6. Frontend deployment — Vercel
-
-The frontend is **static** (no Vite/React/Next). There is no build step.
-
-1. Vercel Dashboard → **Add New → Project** → import the same GitHub repo.
-2. **Root Directory**: `frontend`.
-3. Framework Preset: **Other**. Build Command: *(leave empty)*. Output Directory: `frontend` (`.`).
-4. Set the API base URL **before deploying** by editing
-   `frontend/assets/js/config.js`:
-
-   ```js
-   window.NF_API_BASE = "https://<your-render-service>.onrender.com";
+1. Push the repository to GitHub and import it at
+   [vercel.com/new](https://vercel.com/new). Vercel reads `vercel.json`.
+2. Add a Postgres integration (Neon or another Marketplace provider) and a Blob
+   store to the project. Connect both to Production/Preview/Development.
+3. Confirm these environment variables are present in Vercel:
+   - `DATABASE_URL` or `POSTGRES_URL` (provided by the Postgres integration;
+     it must be a PostgreSQL connection URL)
+   - `BLOB_READ_WRITE_TOKEN` or `BLOB_STORE_ID` (provided by the Blob store)
+   - `STORAGE_BACKEND=auto` (uses Blob when credentials are available)
+   - `SECRET_KEY`, `JWT_SECRET_KEY` (generate strong random values)
+   - `BLOB_ACCESS=private` (or `public`, matching the store)
+4. Run the migrations once against the managed database from your machine.
+   The command requires the production Postgres URL:
+   ```powershell
+   cd backend
+   $env:DATABASE_URL="postgresql://<user>:<password>@<host>/<database>?sslmode=require"
+   .\venv\Scripts\python.exe -m flask --app app.factory db upgrade
    ```
+5. Deploy. Verify `GET https://<project>.vercel.app/healthz` returns
+   `{"status":"ok",...}` and `https://<project>.vercel.app/apidocs/` loads.
 
-   - No trailing slash. Do **not** include `/api` — API paths already contain it.
-   - Leave empty (`""`) for local development (same-origin).
-   - This value is public (it is the API origin); never put secrets here.
-5. Deploy and open the Vercel URL.
+> Vercel Postgres is now delivered through Marketplace integrations (Neon). The
+> `POSTGRES_URL`/`DATABASE_URL` naming is unchanged.
 
-> Static hosting cannot inject build-time env vars without a build step, so the
-> API base lives in `config.js`. If you prefer env-driven configuration, add a
-> small Node build step or use a Vercel rewrite proxy (`/api/*` → Render) instead;
-> both are documented alternatives.
+On Vercel, the app fails at startup if a Postgres URL or Blob credentials are
+missing. This prevents a deployment from appearing healthy while silently
+writing data to MySQL defaults or ephemeral local storage. Locally, storage
+continues to use the filesystem unless Blob credentials are provided.
 
-Direct-refresh works on all pages because every route maps to a real `.html`
-file (e.g. `/pages/login.html`); no SPA rewrites or `vercel.json` are required.
+---
+
+## 6. Alternative: separate frontend and backend projects
+
+If you prefer independent deployments:
+
+1. Deploy `backend/` as its own Vercel project (Root Directory: `backend`).
+2. Deploy `frontend/` as another Vercel project (Root Directory: `frontend`,
+   Framework: Other, no build command).
+3. Edit `frontend/assets/js/config.js` and set `window.NF_API_BASE` to the
+   backend origin (no trailing slash, no `/api`). Add the frontend origin to
+   `CORS_ORIGINS` on the backend.
+
+The single-project `vercel.json` setup above is recommended because it avoids
+cross-origin configuration entirely.
+
+Direct-refresh works because every page maps to a real `.html` file (e.g.
+`/pages/login.html`); no SPA fallback is required.
 
 ---
 
@@ -208,14 +220,13 @@ generated receipts/uploads/exports, and caches. **Never commit `.env`.**
 
 ## 8. Connecting frontend, backend & CORS
 
-- Backend CORS is restricted to `CORS_ORIGINS` (comma-separated). Set it to the
-  exact Vercel origin, e.g. `https://natifine.vercel.app`.
+- With `vercel.json` Services the browser calls `/api/*` on the same origin, so
+  CORS is not involved.
+- `CORS_ORIGINS` only matters for the separate-project alternative. Set it to
+  the exact frontend origin, e.g. `https://natifine.vercel.app`.
 - `Authorization` header is allowed; credentials (cookies) are **not** used, so
   wildcard-with-credentials is avoided.
 - Preflight `OPTIONS` is handled by Flask-CORS.
-- After deploying the frontend, update `CORS_ORIGINS` on Render and redeploy.
-- In the browser Network tab, API calls should target the **Render** URL, never
-  `localhost`.
 
 ---
 
@@ -233,18 +244,19 @@ generated receipts/uploads/exports, and caches. **Never commit `.env`.**
 
 ## 10. Verification checklist
 
-- [ ] `flask db upgrade` runs cleanly on the production database (after backup).
+- [ ] `flask db upgrade` runs cleanly on the Postgres database (after backup).
 - [ ] `GET /healthz` returns 200 with `{"status":"ok"}`.
 - [ ] Backend tests pass (`python -m pytest`).
 - [ ] Register + login work against the deployed API.
 - [ ] Protected routes reject requests without a valid token (401/403).
 - [ ] Citizen cannot open another citizen's records.
-- [ ] CORS: browser calls from the Vercel origin succeed; other origins blocked.
 - [ ] Fines, disputes, notifications, dashboards render with live API data.
-- [ ] Database writes persist after a backend restart.
+- [ ] Database writes persist across cold starts.
+- [ ] Dispute uploads and receipt downloads still work after a cold start
+      (proves files are in Vercel Blob, not local disk).
 - [ ] No secrets appear in the Git repo or the frontend bundle.
 - [ ] Direct refresh on `/pages/...` URLs does not 404.
-- [ ] Browser console has no errors; Network tab shows Render calls only.
+- [ ] Browser console has no errors; API calls go to `/api/*` on the same origin.
 
 ---
 
@@ -252,11 +264,14 @@ generated receipts/uploads/exports, and caches. **Never commit `.env`.**
 
 | Symptom | Cause / fix |
 |---------|-------------|
-| Render build fails parsing `requirements.txt` | File was UTF-16; it is now UTF-8. Re-commit. |
-| `Access denied` / DB errors on Render | Wrong `DATABASE_URL`/`DB_*`; check provider host/port and `DB_SSL`. |
-| CORS error in browser | `CORS_ORIGINS` does not include the exact Vercel origin (scheme + host, no trailing slash). |
-| Frontend calls `localhost` / its own host | `window.NF_API_BASE` not set in `frontend/assets/js/config.js`. |
-| Slow first response | Render free instances sleep and cold-start (~30–60s). Upgrade to avoid. |
+| Vercel build cannot find the Flask app | Ensure `vercel.json` points at `backend/` with entrypoint `index:app`. |
+| `Access denied` / DB errors | Wrong `DATABASE_URL`/`POSTGRES_URL`; check host, password and `sslmode=require`. |
+| `NoSuchModuleError: postgres` | The URL used `postgres://`; this project rewrites it to `postgresql+psycopg2://`. |
+| Vercel app fails to start with a Blob configuration error | Connect a Blob store to the project and confirm `BLOB_READ_WRITE_TOKEN` or `BLOB_STORE_ID` is available to the deployment. |
+| Uploads/receipts disappear | Confirm Blob credentials are configured and `BLOB_ACCESS` matches the store. Older deployments without the startup check may have written files to ephemeral local storage. |
+| `BlobCredentialsError` | The Blob store is not connected to the Vercel project (or `BLOB_ACCESS` does not match the store). |
+| Large upload returns 413 | Vercel Functions cap request bodies at 4.5 MB; use a smaller file or client uploads. |
+| CORS error in browser (separate projects) | `CORS_ORIGINS` does not include the exact frontend origin. |
 | `flask db upgrade` makes no changes | Migrations not applied to the right DB; verify `DATABASE_URL`. |
 | Login works but other calls 401 | Access token expired; refresh token flow or re-login. |
 
@@ -265,33 +280,43 @@ generated receipts/uploads/exports, and caches. **Never commit `.env`.**
 ## 12. Files created / modified for deployment
 
 **Created**
+- `vercel.json` — Vercel Services config (frontend + Flask backend).
+- `backend/index.py` — Vercel WSGI entrypoint.
+- `backend/app/services/storage_service.py` — local/Vercel Blob abstraction.
 - `backend/requirements-dev.txt` — split dev/test dependencies.
 - `backend/gunicorn.conf.py` — production WSGI config (PORT, workers, timeouts).
 - `backend/.env.example` — safe environment template.
-- `backend/.python-version` — pins Python 3.13.0 for Render.
+- `backend/.python-version` — pins Python 3.13.0.
 - `.gitignore` — excludes venv, caches, secrets, generated files.
-- `render.yaml` — Render blueprint (rootDir, build/start, health check).
-- `frontend/assets/js/config.js` — runtime API base URL for Vercel.
+- `render.yaml` — optional Render blueprint (alternative host).
 - `README.md` — this document.
 
 **Modified**
-- `backend/requirements.txt` — re-encoded UTF-16 → UTF-8, removed duplicates and
-  dev-only packages (moved to `requirements-dev.txt`).
-- `backend/app/config/settings.py` — `DATABASE_URL`/`DB_SSL`/`CORS_ORIGINS`
-  support, MySQL URL normalization, connection pool settings.
+- `backend/requirements.txt` — added `psycopg2-binary`, `vercel-blob`, `openpyxl`.
+- `backend/app/config/settings.py` — Postgres URL detection/normalization,
+  serverless pool settings, Blob settings, 4 MB upload limit.
+- `backend/app/services/upload_service.py` — stores dispute documents in Blob.
+- `backend/app/services/receipt_service.py` — generates PDFs in memory and stores
+  them in Blob.
+- `backend/app/services/export_service.py` — exports through Blob/local storage.
+- `backend/app/services/email_service.py` — reads receipt attachments from storage.
+- `backend/migrations/versions/fd274eb3c917_initial_schema.py` — portable enums
+  for Postgres (created once, no duplicate-type errors).
+- `frontend/assets/js/config.js` — same-origin API base by default.
 - `backend/app/factory.py` — origin-restricted CORS + `/healthz` endpoint.
 - `frontend/assets/js/api.js` — API base resolved from `window.NF_API_BASE`.
 - `frontend/**/*.html` (29 files) — load `config.js` before `api.js`.
-- `backend/migrations/versions/` — old broken chain replaced with
-  `fd274eb3c917_initial_schema.py` (all tables, correct FK order).
 
 ---
 
 ## 13. Known limitations
 
-- **Database**: currently local MySQL only. Cloud hosting is not yet provisioned;
-  the backend is deploy-ready but needs a `DATABASE_URL` (managed MySQL).
-- **Render free tier**: web service sleeps when idle (cold starts).
+- **Database**: local MySQL for development, managed Postgres for deployment.
+  A `DATABASE_URL`/`POSTGRES_URL` is required on Vercel.
+- **Vercel Functions**: request bodies are capped at 4.5 MB; keep dispute
+  attachments smaller (the app defaults to 4 MB).
+- **Blob access mode**: receipts and dispute documents are private by default.
+  Set `BLOB_ACCESS=public` only if the store was created as public.
 - **Simulated services**: payments, SMS, WhatsApp and email are mocked; no real
   gateway/provider credentials are used.
 - **Swagger** server list still contains placeholder domains (`api.natifine.co.za`);

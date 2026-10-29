@@ -5,6 +5,7 @@ from flask_mail import Message
 from flask import render_template
 
 from app.config.mail import mail
+from app.services.storage_service import StorageService
 
 
 class EmailService:
@@ -123,17 +124,17 @@ class EmailService:
 
         )
 
-        with open(receipt_path, "rb") as attachment:
+        attachment = StorageService().read(receipt_path)
 
-            message.attach(
+        message.attach(
 
-                filename=os.path.basename(receipt_path),
+            filename=os.path.basename(receipt_path),
 
-                content_type="application/pdf",
+            content_type="application/pdf",
 
-                data=attachment.read()
+            data=attachment
 
-            )
+        )
 
         mail.send(message)
 

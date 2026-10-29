@@ -2,12 +2,13 @@
    NatiFine SA — Runtime configuration
    Loaded BEFORE api.js on every page.
 
-   Local development (Flask serves the frontend): leave empty (same origin).
-   Production (Vercel): set to the Render backend origin, NO trailing slash.
+   Local development and Vercel Services both serve the frontend and backend
+   from the same origin, so the default empty value is correct.
 
+   To point at a separate backend (e.g. Render), set an absolute origin here:
      window.NF_API_BASE = "https://natifine-api.onrender.com";
 
-   The API paths already include the /api prefix (e.g. /api/auth/login),
-   so NF_API_BASE must NOT include /api.
+   API paths already include the /api prefix (e.g. /api/auth/login), so
+   NF_API_BASE must NOT include /api.
    ========================================================================== */
-window.NF_API_BASE = window.NF_API_BASE || "http://localhost:5000";
+window.NF_API_BASE = window.NF_API_BASE || "";

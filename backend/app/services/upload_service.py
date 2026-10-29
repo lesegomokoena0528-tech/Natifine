@@ -3,6 +3,8 @@ import uuid
 
 from werkzeug.utils import secure_filename
 
+from app.services.storage_service import StorageService
+
 
 class UploadService:
 
@@ -13,14 +15,27 @@ class UploadService:
         "pdf"
     }
 
-    UPLOAD_FOLDER = "uploads/disputes"
+    BASE_DIR = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..")
+    )
+
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 
     def __init__(self):
 
-        os.makedirs(
-            self.UPLOAD_FOLDER,
-            exist_ok=True
-        )
+        self.storage = StorageService(self.UPLOAD_FOLDER)
+
+        if not self.storage.use_blob:
+
+            try:
+                os.makedirs(
+                    self.UPLOAD_FOLDER,
+                    exist_ok=True
+                )
+            except OSError:
+                # Serverless filesystems are read-only; uploads will only
+                # work once a Blob store is connected.
+                pass
 
     def allowed_file(self, filename):
 
@@ -32,27 +47,9 @@ class UploadService:
 
     def save(self, file):
 
-        if not self.allowed_file(file.filename):
+        information = self.upload(file, "disputes")
 
-            raise ValueError("Unsupported file type.")
-
-        extension = file.filename.rsplit(".", 1)[1]
-
-        filename = f"{uuid.uuid4()}.{extension}"
-
-        filename = secure_filename(filename)
-
-        path = os.path.join(
-
-            self.UPLOAD_FOLDER,
-
-            filename
-
-        )
-
-        file.save(path)
-
-        return path
+        return information["path"]
 
     def upload(self, file, category="uploads"):
         """
@@ -73,13 +70,19 @@ class UploadService:
             f"{uuid.uuid4().hex}.{extension}"
         )
 
-        folder = os.path.join("uploads", category)
+        pathname = f"{category}/{filename}"
 
-        os.makedirs(folder, exist_ok=True)
+        local_path = os.path.join(
+            self.UPLOAD_FOLDER,
+            category,
+            filename
+        )
 
-        path = os.path.join(folder, filename)
-
-        file.save(path)
+        result = self.storage.save_file(
+            file,
+            blob_pathname=pathname,
+            local_path=local_path
+        )
 
         return {
 
@@ -93,8 +96,10 @@ class UploadService:
                 None
             ) or "application/octet-stream",
 
-            "size": os.path.getsize(path),
+            "size": result["size"],
 
-            "path": path
+            "path": result["path"],
+
+            "url": result["url"]
 
         }

@@ -1,3 +1,4 @@
+import io
 import os
 from datetime import datetime
 
@@ -7,6 +8,7 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate
 
 from app.repositories.fine_repository import FineRepository
 from app.repositories.user_repository import UserRepository
+from app.services.storage_service import StorageService
 
 
 class ReceiptService:
@@ -19,10 +21,19 @@ class ReceiptService:
     RECEIPT_FOLDER = os.path.join(BASE_DIR, "receipts")
 
     def __init__(self):
-        os.makedirs(
-            self.RECEIPT_FOLDER,
-            exist_ok=True
-        )
+        self.storage = StorageService(self.RECEIPT_FOLDER)
+
+        if not self.storage.use_blob:
+            try:
+                os.makedirs(
+                    self.RECEIPT_FOLDER,
+                    exist_ok=True
+                )
+            except OSError:
+                # Serverless filesystems are read-only; receipts will only
+                # work once a Blob store is connected.
+                pass
+
         self.fine_repository = FineRepository()
         self.user_repository = UserRepository()
 
@@ -42,12 +53,10 @@ class ReceiptService:
             user = self.user_repository.find_by_id(payment.user_id)
 
         filename = f"receipt_{payment.payment_id}.pdf"
-        path = os.path.join(
-            self.RECEIPT_FOLDER,
-            filename
-        )
 
-        doc = SimpleDocTemplate(path)
+        buffer = io.BytesIO()
+
+        doc = SimpleDocTemplate(buffer)
         styles = getSampleStyleSheet()
 
         citizen_name = f"{user.first_name} {user.last_name}" if user else "Motorist"
@@ -95,9 +104,18 @@ class ReceiptService:
 
         doc.build(story)
 
+        result = self.storage.save_bytes(
+            buffer.getvalue(),
+            blob_pathname=f"receipts/{filename}",
+            local_path=os.path.join(self.RECEIPT_FOLDER, filename),
+            content_type="application/pdf",
+            overwrite=True
+        )
+
         return {
             "filename": filename,
-            "path": path
+            "path": result["path"],
+            "url": result["url"]
         }
 
     def download(self, payment):
@@ -107,8 +125,10 @@ class ReceiptService:
         """
         result = self.generate_receipt(payment)
 
+        data = self.storage.read(result["path"])
+
         return send_file(
-            result["path"],
+            io.BytesIO(data),
             mimetype="application/pdf",
             as_attachment=True,
             download_name=result["filename"]
