@@ -5,6 +5,7 @@ from app.repositories.admin_repository import AdminRepository
 from app.repositories.fine_repository import FineRepository
 from app.repositories.payment_repository import PaymentRepository
 from app.repositories.dispute_repository import DisputeRepository
+from app.models.user import UserRole, UserStatus
 
 
 class ReportService:
@@ -103,13 +104,13 @@ class ReportService:
 
                         u for u in users
 
-                        if u.status == "ACTIVE"
+                        if u.status == UserStatus.ACTIVE
 
                     ]
 
                 ),
 
-            "suspended":
+            "inactive":
 
                 len(
 
@@ -117,7 +118,21 @@ class ReportService:
 
                         u for u in users
 
-                        if u.status == "SUSPENDED"
+                        if u.status == UserStatus.INACTIVE
+
+                    ]
+
+                ),
+
+            "locked":
+
+                len(
+
+                    [
+
+                        u for u in users
+
+                        if u.status == UserStatus.LOCKED
 
                     ]
 
@@ -131,7 +146,7 @@ class ReportService:
 
                         u for u in users
 
-                        if u.role == "ADMIN"
+                        if u.role == UserRole.ADMIN
 
                     ]
 
@@ -145,7 +160,7 @@ class ReportService:
 
                         u for u in users
 
-                        if u.role == "OFFICER"
+                        if u.role == UserRole.OFFICER
 
                     ]
 
@@ -159,7 +174,7 @@ class ReportService:
 
                         u for u in users
 
-                        if u.role == "CITIZEN"
+                        if u.role == UserRole.CITIZEN
 
                     ]
 
