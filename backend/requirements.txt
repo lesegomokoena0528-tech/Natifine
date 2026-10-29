@@ -1,6 +1,6 @@
 # ==========================================================
 # NatiFine SA - Production dependencies
-# Python 3.13 (see render.yaml / Dockerfile)
+# Python 3.12 on Vercel; Render/Docker may use a newer supported runtime.
 # ==========================================================
 
 # Web framework
@@ -20,7 +20,7 @@ Flask-SQLAlchemy==3.1.1
 SQLAlchemy==2.0.51
 greenlet==3.5.4
 PyMySQL==1.1.1
-psycopg2-binary==2.9.10
+psycopg2-binary==2.9.13
 Flask-Migrate==4.0.7
 alembic==1.18.5
 Mako==1.3.12

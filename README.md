@@ -269,6 +269,7 @@ generated receipts/uploads/exports, and caches. **Never commit `.env`.**
 | Vercel build cannot find the Flask app | Ensure `vercel.json` points at `backend/` with entrypoint `index:app`. |
 | `Access denied` / DB errors | Wrong `DATABASE_URL`/`POSTGRES_URL`; check host, password and `sslmode=require`. |
 | `NoSuchModuleError: postgres` | The URL used `postgres://`; this project rewrites it to `postgresql+psycopg2://`. |
+| Vercel reports `pg_config executable not found` while installing psycopg2 | Ensure the deployment uses the current `psycopg2-binary` pin in `backend/requirements.txt` and rebuild from the latest commit; older pins may lack a wheel for Vercel's Python/Linux target. |
 | Upload/export returns a Blob configuration error | Connect a Blob store to the project and confirm `BLOB_READ_WRITE_TOKEN` or `BLOB_STORE_ID` is available to the deployment. |
 | Uploads/receipts disappear | Confirm Blob credentials are configured and `BLOB_ACCESS` matches the store. Older deployments may have written files to ephemeral local storage. |
 | `BlobCredentialsError` | The Blob store is not connected to the Vercel project (or `BLOB_ACCESS` does not match the store). |
