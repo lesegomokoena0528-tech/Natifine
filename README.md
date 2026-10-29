@@ -35,7 +35,7 @@ NatiFine/
 │   ├── requirements.txt     production deps
 │   ├── requirements-dev.txt dev/test deps
 │   ├── .env.example         environment template
-│   └── .python-version      3.13.0
+│   └── .python-version      3.13
 ├── frontend/                static site
 │   ├── index.html           public landing page
 │   ├── pages/               citizen / officer / admin pages
@@ -173,10 +173,11 @@ Steps:
 > Vercel Postgres is now delivered through Marketplace integrations (Neon). The
 > `POSTGRES_URL`/`DATABASE_URL` naming is unchanged.
 
-On Vercel, the app fails at startup if a Postgres URL or Blob credentials are
-missing. This prevents a deployment from appearing healthy while silently
-writing data to MySQL defaults or ephemeral local storage. Locally, storage
-continues to use the filesystem unless Blob credentials are provided.
+On Vercel, the app fails at startup if the Postgres URL is missing. It never
+falls back to MySQL defaults. Blob credentials can be connected after the first
+project deployment; until then, upload/export operations fail with an explicit
+configuration error instead of writing to ephemeral local storage. Locally,
+storage continues to use the filesystem unless Blob credentials are provided.
 
 ---
 
@@ -267,8 +268,8 @@ generated receipts/uploads/exports, and caches. **Never commit `.env`.**
 | Vercel build cannot find the Flask app | Ensure `vercel.json` points at `backend/` with entrypoint `index:app`. |
 | `Access denied` / DB errors | Wrong `DATABASE_URL`/`POSTGRES_URL`; check host, password and `sslmode=require`. |
 | `NoSuchModuleError: postgres` | The URL used `postgres://`; this project rewrites it to `postgresql+psycopg2://`. |
-| Vercel app fails to start with a Blob configuration error | Connect a Blob store to the project and confirm `BLOB_READ_WRITE_TOKEN` or `BLOB_STORE_ID` is available to the deployment. |
-| Uploads/receipts disappear | Confirm Blob credentials are configured and `BLOB_ACCESS` matches the store. Older deployments without the startup check may have written files to ephemeral local storage. |
+| Upload/export returns a Blob configuration error | Connect a Blob store to the project and confirm `BLOB_READ_WRITE_TOKEN` or `BLOB_STORE_ID` is available to the deployment. |
+| Uploads/receipts disappear | Confirm Blob credentials are configured and `BLOB_ACCESS` matches the store. Older deployments may have written files to ephemeral local storage. |
 | `BlobCredentialsError` | The Blob store is not connected to the Vercel project (or `BLOB_ACCESS` does not match the store). |
 | Large upload returns 413 | Vercel Functions cap request bodies at 4.5 MB; use a smaller file or client uploads. |
 | CORS error in browser (separate projects) | `CORS_ORIGINS` does not include the exact frontend origin. |
@@ -286,7 +287,7 @@ generated receipts/uploads/exports, and caches. **Never commit `.env`.**
 - `backend/requirements-dev.txt` — split dev/test dependencies.
 - `backend/gunicorn.conf.py` — production WSGI config (PORT, workers, timeouts).
 - `backend/.env.example` — safe environment template.
-- `backend/.python-version` — pins Python 3.13.0.
+- `backend/.python-version` — selects Python 3.13 for Vercel.
 - `.gitignore` — excludes venv, caches, secrets, generated files.
 - `render.yaml` — optional Render blueprint (alternative host).
 - `README.md` — this document.
