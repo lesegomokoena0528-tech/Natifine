@@ -3,7 +3,7 @@
 NatiFine REST API Documentation
 ==========================================================
 
-Author  : Thapelo Mbokane
+Author  : Lesego Mokoena
 Version : 1.0.0
 OpenAPI : 3.0.3
 ==========================================================
