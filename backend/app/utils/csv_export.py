@@ -1,5 +1,7 @@
 import csv
 
+from app.utils.report_formatting import display_label, flatten_report_data
+
 
 class CSVExporter:
 
@@ -27,20 +29,12 @@ class CSVExporter:
 
             writer = csv.writer(file)
 
-            writer.writerow([
-
-                "Field",
-
-                "Value"
-
-            ])
-
-            for key, value in data.items():
-
-                writer.writerow([
-
-                    key,
-
-                    value
-
-                ])
+            writer.writerow(["Section", "Metric", "Value"])
+            writer.writerows(
+                (
+                    display_label(section),
+                    display_label(metric),
+                    value,
+                )
+                for section, metric, value in flatten_report_data(data)
+            )
