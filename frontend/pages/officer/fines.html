@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Traffic Fines · NatiFine SA</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a4d8c'/><text x='50' y='68' font-size='54' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>NF</text></svg>">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-scrim hidden" id="scrim"></div>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <h1>Traffic Fines</h1>
+            <p>All fines issued by the enforcement team.</p>
+          </div>
+          <a class="btn" href="/pages/officer/issue-fine.html">Issue fine</a>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="filter-bar">
+              <div class="form-group flex-1">
+                <label class="sr-only" for="search">Search</label>
+                <input class="input" id="search" placeholder="Search by fine number, citizen, vehicle, offence…">
+              </div>
+              <div class="form-group">
+                <label for="filter">Status</label>
+                <select class="select" id="filter">
+                  <option value="">All statuses</option>
+                  <option value="ISSUED">Issued (unpaid)</option>
+                  <option value="PAID">Paid</option>
+                  <option value="DISPUTED">Disputed</option>
+                  <option value="UNDER_REVIEW">Under review</option>
+                  <option value="APPROVED_DISPUTE">Approved dispute</option>
+                  <option value="REJECTED_DISPUTE">Rejected dispute</option>
+                  <option value="CANCELLED">Cancelled</option>
+                  <option value="CLOSED">Closed</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <button class="btn btn-secondary" id="refresh" type="button">Refresh</button>
+              </div>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr><th>Fine number</th><th>Offence</th><th>Citizen</th><th>Vehicle</th><th>Amount</th><th>Due</th><th>Status</th><th class="actions">Actions</th></tr>
+              </thead>
+              <tbody id="rows"><tr><td colspan="8"><div class="spinner"></div></td></tr></tbody>
+            </table>
+          </div>
+          <div class="card-footer" id="pager"></div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="/assets/js/config.js"></script>
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/app.js"></script>
+  <script>NFShell.mount({ role: "officer", active: "fines", title: "Traffic Fines", subtitle: "All issued fines" });</script>
+  <script src="/assets/js/pages/officer-fines.js"></script>
+</body>
+</html>

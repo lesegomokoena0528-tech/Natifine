@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Traffic Fine Notification</title>
+</head>
+<body>
+
+<h2>Traffic Fine Notification</h2>
+
+<p>Dear {{ user.first_name }},</p>
+
+<p>A traffic fine has been issued against your vehicle.</p>
+
+<table border="1" cellpadding="8">
+
+<tr>
+    <td><strong>Fine Number</strong></td>
+    <td>{{ fine.fine_number }}</td>
+</tr>
+
+<tr>
+    <td><strong>Offence</strong></td>
+    <td>{{ fine.offence }}</td>
+</tr>
+
+<tr>
+    <td><strong>Amount</strong></td>
+    <td>R {{ fine.amount }}</td>
+</tr>
+
+<tr>
+    <td><strong>Due Date</strong></td>
+    <td>{{ fine.due_date }}</td>
+</tr>
+
+</table>
+
+<p>Please settle the fine before the due date.</p>
+
+</body>
+</html>

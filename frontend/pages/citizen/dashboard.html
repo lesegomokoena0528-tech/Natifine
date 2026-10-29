@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard · NatiFine SA</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a4d8c'/><text x='50' y='68' font-size='54' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>NF</text></svg>">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-scrim hidden" id="scrim"></div>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <h1 id="welcome">Welcome</h1>
+            <p id="welcome-sub">Here is a summary of your traffic fines and account.</p>
+          </div>
+          <div class="flex gap-8">
+            <a class="btn btn-secondary" href="/pages/citizen/fines.html">View all fines</a>
+            <a class="btn" href="/pages/citizen/fines.html?filter=ISSUED">Pay a fine</a>
+          </div>
+        </div>
+
+        <div class="stat-grid mb-24" id="stats">
+          <div class="stat"><div class="stat-label">Total fines</div><div class="stat-value" id="s-total">—</div><div class="stat-sub">All time</div></div>
+          <div class="stat warn"><div class="stat-label">Unpaid</div><div class="stat-value" id="s-unpaid">—</div><div class="stat-sub">Awaiting payment</div></div>
+          <div class="stat danger"><div class="stat-label">Amount outstanding</div><div class="stat-value" id="s-out">—</div><div class="stat-sub">Total due</div></div>
+          <div class="stat accent"><div class="stat-label">Amount paid</div><div class="stat-value" id="s-paid">—</div><div class="stat-sub">Settled</div></div>
+        </div>
+
+        <div class="grid grid-2" style="grid-template-columns:1.6fr 1fr">
+          <section class="card">
+            <div class="card-header">
+              <h2>Recent fines</h2>
+              <a class="small" href="/pages/citizen/fines.html">View all</a>
+            </div>
+            <div class="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr><th>Fine</th><th>Offence</th><th>Amount</th><th>Due</th><th>Status</th></tr>
+                </thead>
+                <tbody id="recent-fines"><tr><td colspan="5"><div class="skeleton skeleton-row"></div></td></tr></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="card-header"><h2>My vehicles</h2><a class="small" href="/pages/citizen/vehicles.html">Manage</a></div>
+            <div class="card-body" id="vehicles">
+              <div class="skeleton skeleton-card"></div>
+            </div>
+          </section>
+        </div>
+
+        <section class="card mt-24">
+          <div class="card-header"><h2>Quick actions</h2></div>
+          <div class="card-body grid grid-3">
+            <a class="btn btn-secondary btn-block" href="/pages/citizen/fines.html?filter=ISSUED">Pay outstanding fines</a>
+            <a class="btn btn-secondary btn-block" href="/pages/citizen/disputes.html">Submit / track a dispute</a>
+            <a class="btn btn-secondary btn-block" href="/pages/citizen/notifications.html">Read notifications</a>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="/assets/js/config.js"></script>
+
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/app.js"></script>
+  <script>NFShell.mount({ role: "citizen", active: "dashboard", title: "Dashboard", subtitle: "Motorist overview" });</script>
+  <script src="/assets/js/pages/citizen-dashboard.js"></script>
+</body>
+</html>

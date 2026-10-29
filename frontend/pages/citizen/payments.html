@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payments · NatiFine SA</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a4d8c'/><text x='50' y='68' font-size='54' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>NF</text></svg>">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-scrim hidden" id="scrim"></div>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <h1>Payments</h1>
+            <p>Your payment history, receipts and refund requests.</p>
+          </div>
+        </div>
+
+        <div class="stat-grid mb-24">
+          <div class="stat accent"><div class="stat-label">Total paid</div><div class="stat-value" id="t-paid">—</div><div class="stat-sub">All successful payments</div></div>
+          <div class="stat"><div class="stat-label">Total refunded</div><div class="stat-value" id="t-refund">—</div><div class="stat-sub">Approved refunds</div></div>
+          <div class="stat"><div class="stat-label">Payments</div><div class="stat-value" id="t-count">—</div><div class="stat-sub">Transactions on record</div></div>
+          <div class="stat warn"><div class="stat-label">Pending</div><div class="stat-value" id="t-pending">—</div><div class="stat-sub">Awaiting completion</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h2>Transaction history</h2></div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr><th>Reference</th><th>Fine</th><th>Method</th><th>Amount</th><th>Status</th><th>Paid</th><th class="actions">Actions</th></tr>
+              </thead>
+              <tbody id="rows"><tr><td colspan="7"><div class="spinner"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card mt-24">
+          <div class="card-header">
+            <h2>Refund requests</h2>
+            <button class="btn btn-secondary btn-sm" id="refresh-refunds" type="button">Refresh</button>
+          </div>
+          <div class="table-wrap">
+            <table class="table">
+              <thead>
+                <tr><th>Reference</th><th>Payment</th><th>Fine</th><th>Amount</th><th>Status</th><th>Requested</th><th>Approved</th></tr>
+              </thead>
+              <tbody id="refund-rows"><tr><td colspan="7"><div class="spinner"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/assets/js/config.js"></script>
+
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/app.js"></script>
+  <script>NFShell.mount({ role: "citizen", active: "payments", title: "Payments", subtitle: "History & receipts" });</script>
+  <script src="/assets/js/pages/citizen-payments.js"></script>
+</body>
+</html>

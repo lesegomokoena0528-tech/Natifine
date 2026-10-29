@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="400" viewBox="0 0 640 400" role="img" aria-label="Simulated traffic camera evidence showing a vehicle exceeding the speed limit">
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1f2b3e"/>
+      <stop offset="1" stop-color="#0b1220"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="400" fill="url(#bg2)"/>
+  <rect y="260" width="640" height="140" fill="#243244"/>
+  <g opacity="0.35" stroke="#7c8aa0" stroke-width="3">
+    <line x1="320" y1="270" x2="280" y2="400"/>
+    <line x1="320" y1="270" x2="360" y2="400"/>
+  </g>
+  <g>
+    <rect x="240" y="180" width="160" height="80" rx="12" fill="#e11d48"/>
+    <rect x="260" y="150" width="120" height="50" rx="8" fill="#fb7185"/>
+    <rect x="272" y="160" width="40" height="28" rx="4" fill="#e2e8f0"/>
+    <rect x="322" y="160" width="40" height="28" rx="4" fill="#e2e8f0"/>
+    <circle cx="275" cy="262" r="18" fill="#0b1220"/>
+    <circle cx="365" cy="262" r="18" fill="#0b1220"/>
+  </g>
+  <rect x="380" y="60" width="220" height="80" rx="8" fill="#00000099" stroke="#f59e0b"/>
+  <text x="398" y="95" font-family="monospace" font-size="22" fill="#fbbf24">SPEED 112 km/h</text>
+  <text x="398" y="125" font-family="monospace" font-size="18" fill="#fde68a">LIMIT 80 km/h</text>
+  <text x="20" y="385" font-family="monospace" font-size="14" fill="#94a3b8">SIMULATED EVIDENCE IMAGE - ACADEMIC PROTOTYPE</text>
+</svg>

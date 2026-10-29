@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard · NatiFine SA</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a4d8c'/><text x='50' y='68' font-size='54' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>NF</text></svg>">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-scrim hidden" id="scrim"></div>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <h1>Officer overview</h1>
+            <p>Live enforcement statistics across all issued fines.</p>
+          </div>
+          <a class="btn" href="/pages/officer/issue-fine.html">Issue a new fine</a>
+        </div>
+
+        <div class="stat-grid mb-24">
+          <div class="stat accent"><div class="stat-label">Total fines</div><div class="stat-value" id="s-total">—</div><div class="stat-sub">All time</div></div>
+          <div class="stat warn"><div class="stat-label">Unpaid</div><div class="stat-value" id="s-unpaid">—</div><div class="stat-sub">Still outstanding</div></div>
+          <div class="stat success"><div class="stat-label">Paid</div><div class="stat-value" id="s-paid">—</div><div class="stat-sub">Settled fines</div></div>
+          <div class="stat"><div class="stat-label">Revenue collected</div><div class="stat-value" id="s-revenue">—</div><div class="stat-sub">Simulated payments</div></div>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="card-header">
+              <h2>Recent fines</h2>
+              <a class="btn btn-sm btn-secondary" href="/pages/officer/fines.html">View all</a>
+            </div>
+            <div class="table-wrap table-flush">
+              <table class="table">
+                <thead><tr><th>Fine number</th><th>Offence</th><th>Vehicle</th><th>Amount</th><th>Status</th></tr></thead>
+                <tbody id="recent"><tr><td colspan="5"><div class="spinner"></div></td></tr></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2>Pending dispute reviews</h2>
+              <a class="btn btn-sm btn-secondary" href="/pages/officer/disputes.html">Review all</a>
+            </div>
+            <div class="card-body" id="disputes"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  <script src="/assets/js/config.js"></script>
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/app.js"></script>
+  <script>NFShell.mount({ role: "officer", active: "dashboard", title: "Officer Overview", subtitle: "Enforcement dashboard" });</script>
+  <script src="/assets/js/pages/officer-dashboard.js"></script>
+</body>
+</html>

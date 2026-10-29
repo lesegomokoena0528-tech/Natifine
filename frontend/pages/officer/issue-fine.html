@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Issue Fine · NatiFine SA</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a4d8c'/><text x='50' y='68' font-size='54' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'>NF</text></svg>">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="sidebar-scrim hidden" id="scrim"></div>
+    <div class="main">
+      <header class="topbar" id="topbar"></header>
+      <main class="content">
+        <div class="page-head">
+          <div>
+            <h1>Issue a Traffic Fine</h1>
+            <p>Record an offence against a registered vehicle.</p>
+          </div>
+        </div>
+
+        <form class="card" id="fine-form" novalidate style="max-width:820px">
+          <div class="card-body">
+            <h2 class="mb-16">Vehicle</h2>
+            <div class="form-group">
+              <label for="v-search">Search registered vehicle <span class="req">*</span></label>
+              <input class="input" id="v-search" placeholder="Type a registration number, make or model…" autocomplete="off">
+              <div class="field-hint">Select the vehicle the fine applies to.</div>
+              <div id="v-results" class="suggestions hidden"></div>
+            </div>
+            <div id="v-selected" class="selected-entity hidden"></div>
+
+            <h2 class="mt-24 mb-16">Offence details</h2>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="offence_code">Offence code <span class="req">*</span></label>
+                <input class="input" id="offence_code" maxlength="20" placeholder="e.g. SP30">
+                <div class="field-error" data-error-for="offence_code"></div>
+              </div>
+              <div class="form-group">
+                <label for="severity">Severity <span class="req">*</span></label>
+                <select class="select" id="severity">
+                  <option value="LOW">Low</option>
+                  <option value="MEDIUM" selected>Medium</option>
+                  <option value="HIGH">High</option>
+                  <option value="CRITICAL">Critical</option>
+                </select>
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label for="offence">Offence description <span class="req">*</span></label>
+                <input class="input" id="offence" placeholder="e.g. Exceeding the speed limit by 20km/h">
+                <div class="field-error" data-error-for="offence"></div>
+              </div>
+              <div class="form-group">
+                <label for="amount">Amount (ZAR) <span class="req">*</span></label>
+                <input class="input" id="amount" type="number" min="0" step="0.01" placeholder="e.g. 750.00">
+                <div class="field-error" data-error-for="amount"></div>
+              </div>
+              <div class="form-group">
+                <label for="location">Location <span class="req">*</span></label>
+                <input class="input" id="location" placeholder="e.g. N1 Northbound, Midrand">
+                <div class="field-error" data-error-for="location"></div>
+              </div>
+              <div class="form-group" style="grid-column:1/-1">
+                <label for="remarks">Remarks</label>
+                <textarea class="textarea" id="remarks" placeholder="Any additional notes (optional)"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer flex justify-between items-center">
+            <span class="text-muted small">Due date is set automatically to 30 days from issue.</span>
+            <button class="btn" type="submit" id="submit">Issue fine</button>
+          </div>
+        </form>
+      </main>
+    </div>
+  </div>
+  <script src="/assets/js/config.js"></script>
+
+  <script src="/assets/js/api.js"></script>
+  <script src="/assets/js/app.js"></script>
+  <script>NFShell.mount({ role: "officer", active: "issue-fine", title: "Issue Fine", subtitle: "Record a new offence" });</script>
+  <script src="/assets/js/pages/officer-issue-fine.js"></script>
+</body>
+</html>
