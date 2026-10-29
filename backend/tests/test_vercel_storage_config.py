@@ -76,12 +76,22 @@ def test_storage_uses_local_disk_outside_vercel_without_blob_credentials(
     assert StorageService().backend == "local"
 
 
-def test_storage_fails_closed_on_vercel_without_blob_credentials(monkeypatch):
+def test_storage_defers_missing_blob_credentials_until_storage_is_used(
+    monkeypatch,
+):
     _clear_storage_environment(monkeypatch)
     monkeypatch.setenv("VERCEL", "1")
 
-    with pytest.raises(StorageConfigurationError, match="credentials are missing"):
-        _ = StorageService().backend
+    storage = StorageService()
+    assert storage.backend == "vercel_blob"
+    assert storage.use_blob
+
+    with pytest.raises(StorageConfigurationError, match="neither"):
+        storage.save_bytes(
+            b"data",
+            blob_pathname="test.txt",
+            local_path="unused.txt",
+        )
 
 
 def test_storage_uses_blob_when_store_id_is_configured(monkeypatch):
@@ -99,6 +109,21 @@ def test_local_storage_cannot_be_forced_on_vercel(monkeypatch):
 
     with pytest.raises(StorageConfigurationError, match="not persistent on Vercel"):
         _ = StorageService().backend
+
+
+def test_storage_does_not_fall_back_to_local_on_vercel(monkeypatch):
+    _clear_storage_environment(monkeypatch)
+    monkeypatch.setenv("VERCEL_ENV", "production")
+
+    storage = StorageService()
+    assert storage.backend == "vercel_blob"
+
+    with pytest.raises(StorageConfigurationError, match="neither"):
+        storage.save_bytes(
+            b"data",
+            blob_pathname="test.txt",
+            local_path="unused.txt",
+        )
 
 
 def test_blob_storage_round_trip_uses_sdk(monkeypatch):

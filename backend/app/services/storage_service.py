@@ -59,6 +59,8 @@ class StorageService:
 
         if configured in ("vercel_blob", "vercel-blob", "blob", "vercel"):
             if not has_credentials:
+                if is_vercel:
+                    return "vercel_blob"
                 raise StorageConfigurationError(
                     "Vercel Blob is enabled but neither "
                     "BLOB_READ_WRITE_TOKEN nor BLOB_STORE_ID is configured."
@@ -73,10 +75,7 @@ class StorageService:
         if has_credentials:
             return "vercel_blob"
         if is_vercel:
-            raise StorageConfigurationError(
-                "Vercel Blob credentials are missing. Connect a Blob store "
-                "and provide BLOB_READ_WRITE_TOKEN or BLOB_STORE_ID."
-            )
+            return "vercel_blob"
         return "local"
 
     @property
@@ -90,6 +89,18 @@ class StorageService:
         return access if access in ("public", "private") else "private"
 
     def _blob(self):
+        token = (
+            self._config("BLOB_READ_WRITE_TOKEN")
+            or self._config("VERCEL_BLOB_READ_WRITE_TOKEN")
+        )
+        store_id = self._config("BLOB_STORE_ID")
+
+        if not (token or store_id):
+            raise StorageConfigurationError(
+                "Vercel Blob is enabled but neither "
+                "BLOB_READ_WRITE_TOKEN nor BLOB_STORE_ID is configured."
+            )
+
         if vercel_blob is None:
             raise StorageConfigurationError(
                 "Vercel Blob is enabled but the 'vercel-blob' package is not "
