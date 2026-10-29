@@ -13,6 +13,7 @@ from app.services import storage_service
 
 DATABASE_URL_VARIABLES = (
     "DATABASE_URL",
+    "DATABASE_URL_UNPOOLED",
     "POSTGRES_URL",
     "POSTGRES_URL_NON_POOLING",
 )
@@ -39,6 +40,29 @@ def test_database_url_prefers_database_url(monkeypatch):
     assert _normalize_database_url(_database_url_from_env()) == (
         "postgresql+psycopg2://db.example/natifine"
     )
+
+
+def test_database_url_unpooled_is_used_when_no_pooled_url_is_set(monkeypatch):
+    for name in DATABASE_URL_VARIABLES:
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv(
+        "DATABASE_URL_UNPOOLED",
+        "postgresql://db.example/natifine?sslmode=require",
+    )
+
+    assert _normalize_database_url(_database_url_from_env()) == (
+        "postgresql+psycopg2://db.example/natifine?sslmode=require"
+    )
+
+
+def test_database_url_rejects_a_password_instead_of_a_connection_url(
+    monkeypatch,
+):
+    monkeypatch.delenv("VERCEL", raising=False)
+    monkeypatch.setenv("DATABASE_URL", "not-a-connection-url")
+
+    with pytest.raises(RuntimeError, match="complete .* connection URL"):
+        _database_url_from_env()
 
 
 def test_vercel_requires_a_postgres_url(monkeypatch):

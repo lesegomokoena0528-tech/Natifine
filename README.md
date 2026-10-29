@@ -100,6 +100,7 @@ See `backend/.env.example`. Key variables:
 | `JWT_SECRET_KEY`    | JWT signing key (independent strong random value)              |
 | `DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD` | Local MySQL connection        |
 | `DATABASE_URL` / `POSTGRES_URL` | Managed Postgres URL (Vercel/Neon); `postgres://` auto-upgrades to `postgresql+psycopg2://` |
+| `DATABASE_URL_UNPOOLED` / `POSTGRES_URL_NON_POOLING` | Optional unpooled Postgres URL fallback, useful for database migrations |
 | `DB_SSL`            | `true` to require TLS to a managed MySQL server                |
 | `CORS_ORIGINS`      | Comma-separated browser origins allowed to call the API        |
 | `STORAGE_BACKEND`   | `auto` (default), `local`, or `vercel_blob`                    |
