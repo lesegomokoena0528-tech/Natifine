@@ -21,6 +21,7 @@ def _database_url_from_env():
         "DATABASE_URL",
         "POSTGRES_URL",
         "POSTGRES_URL_NON_POOLING",
+        "DATABASE_URL_UNPOOLED",
     ):
         value = os.getenv(name)
         if value and value.strip():
@@ -28,6 +29,16 @@ def _database_url_from_env():
             break
     else:
         value = None
+
+    if value:
+        normalized = _normalize_database_url(value)
+        if not normalized.startswith(
+            ("mysql+pymysql://", "postgresql+psycopg2://")
+        ):
+            raise RuntimeError(
+                "The configured database URL is invalid. Provide a complete "
+                "MySQL or PostgreSQL connection URL, not a password alone."
+            )
 
     if _is_vercel_environment():
         if not value:
