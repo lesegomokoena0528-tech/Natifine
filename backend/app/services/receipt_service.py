@@ -1,5 +1,4 @@
 import io
-import os
 from datetime import datetime
 
 from flask import send_file
@@ -8,37 +7,13 @@ from reportlab.platypus import Paragraph, SimpleDocTemplate
 
 from app.repositories.fine_repository import FineRepository
 from app.repositories.user_repository import UserRepository
-from app.services.storage_service import StorageService
 
 
 class ReceiptService:
 
-    # Anchored to the backend project root so the folder resolves the same
-    # regardless of the process working directory.
-    BASE_DIR = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..")
-    )
-    RECEIPT_FOLDER = os.path.join(BASE_DIR, "receipts")
-
     def __init__(self):
-        self.storage = StorageService(self.RECEIPT_FOLDER)
-
-        if not self.storage.use_blob:
-            try:
-                os.makedirs(
-                    self.RECEIPT_FOLDER,
-                    exist_ok=True
-                )
-            except OSError:
-                # Serverless filesystems are read-only; receipts will only
-                # work once a Blob store is connected.
-                pass
-
         self.fine_repository = FineRepository()
         self.user_repository = UserRepository()
-
-    def generate(self, payment):
-        return self.generate_receipt(payment)
 
     def generate_receipt(
         self,
@@ -104,31 +79,16 @@ class ReceiptService:
 
         doc.build(story)
 
-        result = self.storage.save_bytes(
-            buffer.getvalue(),
-            blob_pathname=f"receipts/{filename}",
-            local_path=os.path.join(self.RECEIPT_FOLDER, filename),
-            content_type="application/pdf",
-            overwrite=True
-        )
-
         return {
             "filename": filename,
-            "path": result["path"],
-            "url": result["url"]
+            "data": buffer.getvalue(),
         }
 
     def download(self, payment):
-        """
-        Build (or rebuild) the receipt PDF for a payment and return it
-        as a downloadable file response. Used by the receipt endpoint.
-        """
         result = self.generate_receipt(payment)
 
-        data = self.storage.read(result["path"])
-
         return send_file(
-            io.BytesIO(data),
+            io.BytesIO(result["data"]),
             mimetype="application/pdf",
             as_attachment=True,
             download_name=result["filename"]

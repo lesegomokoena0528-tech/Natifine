@@ -139,8 +139,6 @@ class PaymentService:
 
         self.fine_repository.update(fine)
 
-        self.receipt_service.generate(payment)
-
         self.notification_service.payment_success(
             payment.user_id,
             payment
