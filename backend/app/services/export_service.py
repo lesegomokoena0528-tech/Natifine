@@ -2,20 +2,16 @@ import os
 import tempfile
 import uuid
 from datetime import datetime
+from io import BytesIO
 
-from app.services.storage_service import StorageService
+from flask import send_file
+
 from app.utils.pdf_export import PDFExporter
 from app.utils.excel_export import ExcelExporter
 from app.utils.csv_export import CSVExporter
 
 
 class ExportService:
-
-    BASE_DIR = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "..", "..")
-    )
-
-    EXPORT_FOLDER = os.path.join(BASE_DIR, "exports", "reports")
 
     CONTENT_TYPES = {
         "pdf": "application/pdf",
@@ -25,19 +21,6 @@ class ExportService:
         ),
         "csv": "text/csv",
     }
-
-    def __init__(self):
-
-        self.storage = StorageService(self.EXPORT_FOLDER)
-
-        if not self.storage.use_blob:
-            try:
-                os.makedirs(
-                    self.EXPORT_FOLDER,
-                    exist_ok=True
-                )
-            except OSError:
-                pass
 
     def export_pdf(self, report_name, data):
 
@@ -93,21 +76,11 @@ class ExportService:
             except OSError:
                 pass
 
-        result = self.storage.save_bytes(
-            data,
-            blob_pathname=f"exports/reports/{filename}",
-            local_path=os.path.join(
-                self.EXPORT_FOLDER,
-                filename
-            ),
-            content_type=self.CONTENT_TYPES.get(extension),
-            overwrite=True
-        )
-
-        return self._response(
-            filename,
-            result["path"],
-            result["url"]
+        return send_file(
+            BytesIO(data),
+            mimetype=self.CONTENT_TYPES[extension],
+            as_attachment=True,
+            download_name=filename,
         )
 
     @staticmethod
@@ -124,16 +97,3 @@ class ExportService:
             f"{extension}"
 
         )
-
-    @staticmethod
-    def _response(filename, path, url=None):
-
-        return {
-
-            "filename": filename,
-
-            "path": path,
-
-            "url": url
-
-        }
