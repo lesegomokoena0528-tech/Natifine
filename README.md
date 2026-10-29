@@ -35,7 +35,7 @@ NatiFine/
 │   ├── requirements.txt     production deps
 │   ├── requirements-dev.txt dev/test deps
 │   ├── .env.example         environment template
-│   └── .python-version      3.13
+│   └── .python-version      3.12
 ├── frontend/                static site
 │   ├── index.html           public landing page
 │   ├── pages/               citizen / officer / admin pages
@@ -287,7 +287,8 @@ generated receipts/uploads/exports, and caches. **Never commit `.env`.**
 - `backend/requirements-dev.txt` — split dev/test dependencies.
 - `backend/gunicorn.conf.py` — production WSGI config (PORT, workers, timeouts).
 - `backend/.env.example` — safe environment template.
-- `backend/.python-version` — selects Python 3.13 for Vercel.
+- `backend/.python-version` — selects Vercel's default supported Python 3.12
+  runtime. The Docker/Render configuration can use its own Python version.
 - `.gitignore` — excludes venv, caches, secrets, generated files.
 - `render.yaml` — optional Render blueprint (alternative host).
 - `README.md` — this document.
