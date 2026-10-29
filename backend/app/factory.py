@@ -23,13 +23,12 @@ from app.routes.audit_routes import audit_bp
 
 
 def create_app(config_class=None):
-    # Serve the single-page frontend located in the project "frontend" folder.
-    # The email/Jinja templates live alongside the frontend so that the whole
-    # UI layer (pages, assets AND templates) is kept in one folder.
+    # Serve the frontend from the project folder. Email templates are kept
+    # inside the backend package so they are included in the Vercel function.
     frontend_folder_path = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "..", "frontend")
     )
-    template_folder_path = os.path.join(frontend_folder_path, "templates")
+    template_folder_path = os.path.join(os.path.dirname(__file__), "templates")
     app = Flask(
         __name__,
         static_folder=frontend_folder_path,
